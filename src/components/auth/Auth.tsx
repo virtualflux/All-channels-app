@@ -47,7 +47,11 @@ const AuthComponent = () => {
             }).then((res) => {
                 console.log({ res })
                 toast.success("Login successful")
-
+                if (res.status !== 200) {
+                    let message = res?.data?.message
+                    toast.error(message)
+                    return
+                }
                 router.push("/dashboard");
             }).catch((error) => {
                 let message = "Something went wrong"

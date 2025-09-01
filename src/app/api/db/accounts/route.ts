@@ -2,11 +2,13 @@ import { NextRequest } from "next/server";
 import dB from "@/lib/db/db";
 import { HttpStatusCode } from "axios";
 import Account from "./schema";
-import { MongooseError } from "mongoose";
 
 export async function GET(request: NextRequest) {
   try {
+    const query = request.nextUrl.searchParams;
+    console.log({ query });
     await dB();
+    const accounts = await Account.find({ approvedAt: { $ne: null } });
   } catch (e: any) {
     console.log(e);
     return Response.json(

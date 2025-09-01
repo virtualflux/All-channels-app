@@ -5,6 +5,7 @@ export const accountSchema = z.object({
   account_name: z.string().min(1, "account name is required"),
   account_code: z.string().min(1, "account code is required"),
   account_type: z.string().min(1, "account type is required"),
+  approvedAt: z.date(),
   description: z.string().optional(),
 });
 
@@ -31,8 +32,12 @@ const AccountSchema = new Schema<AccountType>(
       lowercase: true,
       required: true,
     },
+    approvedAt: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );
 
-export default models.accounts || model<AccountType>("Account", AccountSchema);
+export default model<AccountType>("Account", AccountSchema);

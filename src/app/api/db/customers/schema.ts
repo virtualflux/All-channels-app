@@ -34,7 +34,7 @@ export const customerSchema = z
       .max(100, "Contact name must be 100 characters or less"),
     account_id: z.string().min(1, "Ledger is required"),
     ignore_auto_number_generation: z.boolean().default(true),
-    approved: z.boolean().optional(),
+    approvedAt: z.date(),
   })
   .refine(
     (data) => {
@@ -51,45 +51,51 @@ export const customerSchema = z
 
 type CustomerType = z.infer<typeof customerSchema>;
 
-const CustomerSchema = new Schema<CustomerType>({
-  approved: { type: String, default: false },
-  company_name: {
-    type: String,
-    trim: true,
-  },
-  contact_name: {
-    required: true,
-    type: String,
-    trim: true,
-  },
-  customer_sub_type: {
-    type: String,
-    default: "individual",
-  },
-  account_id: {
-    type: String,
-    required: true,
-  },
-  contact_persons: [
-    {
-      first_name: { type: String, required: true, trim: true },
-      last_name: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-      email: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-      phone: {
-        type: String,
-        required: true,
-        trim: true,
-      },
+const CustomerSchema = new Schema<CustomerType>(
+  {
+    company_name: {
+      type: String,
+      trim: true,
     },
-  ],
-});
+    contact_name: {
+      required: true,
+      type: String,
+      trim: true,
+    },
+    customer_sub_type: {
+      type: String,
+      default: "individual",
+    },
+    account_id: {
+      type: String,
+      required: true,
+    },
+    contact_persons: [
+      {
+        first_name: { type: String, required: true, trim: true },
+        last_name: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        email: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        phone: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+      },
+    ],
+    approvedAt: {
+      type: Date,
+      default: null,
+    },
+  },
+  { timestamps: true }
+);
 
 export const Customer = model<CustomerType>("Customer", CustomerSchema);

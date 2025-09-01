@@ -20,7 +20,7 @@ type CustomerType = z.infer<typeof customerSchema>
 type ContactPersonField = keyof ContactPersonType
 
 const CustomerForm = () => {
-    const formik = useFormik<Omit<CustomerType, "approved" | "ignore_auto_number_generation">>({
+    const formik = useFormik<Omit<CustomerType, "approved" | "ignore_auto_number_generation" | "approvedAt">>({
         initialValues: {
             contact_type: 'customer',
             customer_sub_type: "individual",

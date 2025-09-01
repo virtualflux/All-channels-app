@@ -25,14 +25,12 @@ const SearchableDropdown = ({
     const [selectedOption, setSelectedOption] = useState({ name: "", value });
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Filter options based on search term
     const filteredOptions = options
         ? options.filter(option =>
             option.name.toLowerCase().includes(searchTerm.toLowerCase())
         )
         : [];
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: any) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {

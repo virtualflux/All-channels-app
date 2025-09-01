@@ -5,24 +5,61 @@ import { FormEvent, useState } from 'react'; import {
     InputOTPSeparator,
     InputOTPSlot,
 } from "@/components/ui/input-otp"
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 const AuthComponent = () => {
+    const router = useRouter()
+
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
     const [isEmailSubmitted, setIsEmailSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+
         e.preventDefault();
         setIsLoading(true);
+
         if (!isEmailSubmitted) {
             console.log({ email, })
-            setTimeout(() => {
-                setIsLoading(false)
+            axios.post("/api/db/auth/get-otp", {
+                email
+            }).then((res) => {
+                toast.success("OTP sent to your provided email")
                 setIsEmailSubmitted(true)
-            }, 1500)
+                if (res.status !== 200) {
+                    let message = res?.data?.message
+                    toast.error(message)
+                }
+            }).catch((error) => {
+                console.log(error)
+
+                let message = "Something went wrong"
+                toast.error(message)
+            }).finally(() => setIsLoading(false))
             return
         }
+        if (isEmailSubmitted) {
+            axios.post("/api/db/auth/verify-otp", {
+                email, code: otp
+            }).then((res) => {
+                console.log({ res })
+                toast.success("Login successful")
+
+                router.push("/dashboard");
+            }).catch((error) => {
+                let message = "Something went wrong"
+                if (axios.isAxiosError(error)) {
+                    message = error.response?.data || error.message
+                }
+                toast.error(message)
+            }).finally(() => setIsLoading(false))
+        }
+
+
+
 
         console.log({ email, otp })
         return

@@ -8,7 +8,15 @@ export async function GET(request: NextRequest) {
     const query = request.nextUrl.searchParams;
     console.log({ query });
     await dB();
-    const accounts = await Account.find({ approvedAt: { $ne: null } });
+    const accounts = await Account.find({});
+
+    return Response.json(
+      {
+        message: "Account fetched",
+        data: accounts,
+      },
+      { status: HttpStatusCode.Ok }
+    );
   } catch (e: any) {
     console.log(e);
     return Response.json(

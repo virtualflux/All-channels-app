@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
 export interface IUser extends mongoose.Document {
-  name: string;
+  fullName: string;
   email: string;
   // phoneNumber: string
-  role: string;
+  role: UserRole;
 }
 
 export enum UserRole {

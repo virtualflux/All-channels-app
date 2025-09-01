@@ -1,11 +1,12 @@
 import { z } from "zod";
-import { Schema, model, models } from "mongoose";
+import { Schema, model, models, mongo } from "mongoose";
 
 export const accountSchema = z.object({
+  createdBy: z.string().transform((args, ctx) => new mongo.ObjectId(args)),
   account_name: z.string().min(1, "account name is required"),
   account_code: z.string().min(1, "account code is required"),
   account_type: z.string().min(1, "account type is required"),
-  approvedAt: z.date(),
+  status: z.enum(["pending", "rejected", "approved"]),
   description: z.string().optional(),
 });
 
@@ -13,6 +14,10 @@ export type AccountType = z.infer<typeof accountSchema>;
 
 const AccountSchema = new Schema<AccountType>(
   {
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
     account_name: {
       type: String,
       required: true,
@@ -32,9 +37,9 @@ const AccountSchema = new Schema<AccountType>(
       lowercase: true,
       required: true,
     },
-    approvedAt: {
-      type: Date,
-      default: null,
+    status: {
+      type: String,
+      default: "pending",
     },
   },
   { timestamps: true }

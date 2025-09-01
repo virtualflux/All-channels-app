@@ -33,10 +33,28 @@ const ACCOUNT_TYPES = [
     { name: 'Expense', value: 'Expense' },
 ];
 const LedgerForm = () => {
-    const { mutate, error, isPending, isSuccess } = useMutation({
-        mutationFn: async (data: Omit<AccountType, "approvedAt">) => {
-            axios.post("/api/db/accounts", data)
-                .then((res) => { console.log(res) })
+    // const { mutate, error, isPending, isSuccess } = useMutation({
+    //     mutationFn: async (data: Omit<AccountType, "approvedAt">) => {
+
+
+    //     },
+    // });
+    const formik = useFormik<Omit<AccountType, "status">>({
+        initialValues: {
+            account_name: '',
+            account_code: '',
+            account_type: '',
+            description: '',
+            createdBy: "" as any
+        },
+
+        onSubmit: async (values, { setSubmitting, resetForm }) => {
+
+            await axios.post("/api/db/accounts", values)
+                .then((res) => {
+                    console.log(res)
+                    toast.success("Account created successfully")
+                })
                 .catch(error => {
                     if (axios.isAxiosError(error)) {
                         const message = error.response?.data?.message ||
@@ -46,21 +64,7 @@ const LedgerForm = () => {
                     }
                     toast.error("Could not submit form , Please try again")
 
-                    throw error
-
                 });
-        },
-    });
-    const formik = useFormik<Omit<AccountType, "approvedAt">>({
-        initialValues: {
-            account_name: '',
-            account_code: '',
-            account_type: '',
-            description: ''
-        },
-
-        onSubmit: async (values, { setSubmitting, resetForm }) => {
-            mutate({ ...values })
 
             resetForm();
         },
@@ -170,7 +174,7 @@ const LedgerForm = () => {
                                     disabled={formik.isSubmitting}
                                     className="px-5 py-2.5 bg-teal-600 border border-transparent rounded-lg text-white font-medium hover:bg-teal-700 focus:outline-none  focus:ring-offset-2 disabled:opacity-75 disabled:cursor-not-allowed"
                                 >
-                                    {isPending ? (
+                                    {formik.isSubmitting ? (
                                         <span className="flex items-center">
                                             <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       { status: HttpStatusCode.Ok }
     );
   } catch (e) {
-    console.error(e);
+    console.log(e);
     return Response.json(
       { message: "Internal Server error, customer was not fetched" },
       { status: HttpStatusCode.InternalServerError }
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       { status: HttpStatusCode.Created }
     );
   } catch (e) {
-    console.error(e);
+    console.log(e);
     return Response.json(
       { message: "Internal Server error, customer was not fetched" },
       { status: HttpStatusCode.InternalServerError }

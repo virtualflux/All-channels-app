@@ -1,6 +1,10 @@
 "use client"
 import { useFormik } from 'formik';
 import SearchableDropdown from '../ui/SearchAbleDropdown';
+import { AccountType } from '@/app/api/db/accounts/schema';
+import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const ACCOUNT_TYPES = [
     { name: 'Cash (Asset)', value: 'Cash' },
@@ -29,7 +33,23 @@ const ACCOUNT_TYPES = [
     { name: 'Expense', value: 'Expense' },
 ];
 const LedgerForm = () => {
-    const formik = useFormik({
+    const { mutate } = useMutation({
+        mutationFn: async (data: AccountType) => {
+            axios.post("/api/db/accounts", data)
+                .then((res) => { console.log(res) })
+                .catch(error => {
+                    if (axios.isAxiosError(error)) {
+                        const message = error.response?.data?.message ||
+                            error.message
+                        toast.error(message)
+                        return
+                    }
+                    toast.error("Could not submit form , Please try again")
+
+                });
+        },
+    });
+    const formik = useFormik<AccountType>({
         initialValues: {
             account_name: '',
             account_code: '',
@@ -38,22 +58,9 @@ const LedgerForm = () => {
         },
 
         onSubmit: async (values, { setSubmitting, resetForm }) => {
-            try {
-                // Here you would make the API call to Zoho Books
-                console.log('Submitting values:', values);
+            mutate({ ...values })
 
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                // On success, you might want to show a success message and reset the form
-                alert('Account created successfully!');
-                resetForm();
-            } catch (error) {
-                console.error('Error creating account:', error);
-                alert('Error creating account. Please try again.');
-            } finally {
-                setSubmitting(false);
-            }
+            resetForm();
         },
     });
 
@@ -118,7 +125,7 @@ const LedgerForm = () => {
                                 <SearchableDropdown
                                     options={ACCOUNT_TYPES}
                                     value={formik.values.account_type}
-                                    onSelect={(data) => { }}
+                                    onSelect={(data) => { formik.setFieldValue("account_type", data.value) }}
                                     placeholder="Select account type"
                                     className=''
                                 />

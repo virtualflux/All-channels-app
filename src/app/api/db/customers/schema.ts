@@ -1,0 +1,95 @@
+import { z } from "zod";
+import { Schema, model } from "mongoose";
+
+export const contactPersonSchema = z.object({
+  first_name: z
+    .string()
+    .min(1, "First name is required")
+    .max(50, "First name must be 50 characters or less"),
+  last_name: z
+    .string()
+    .min(1, "Last name is required")
+    .max(50, "Last name must be 50 characters or less"),
+  email: z.string().email("Invalid email address").min(1, "Email is required"),
+  phone: z.string().max(20, "Phone must be 20 characters or less").optional(),
+  is_primary_contact: z.boolean().default(true),
+});
+
+export const customerSchema = z
+  .object({
+    contact_type: z.literal("customer"),
+    customer_sub_type: z.enum(["individual", "business", "other"], {
+      errorMap: () => ({ message: "Customer sub type is required" }),
+    }),
+    contact_persons: z
+      .array(contactPersonSchema)
+      .min(1, "At least one contact person is required"),
+    company_name: z
+      .string()
+      .max(100, "Company name must be 100 characters or less")
+      .optional(),
+    contact_name: z
+      .string()
+      .min(1, "Contact name is required")
+      .max(100, "Contact name must be 100 characters or less"),
+    account_id: z.string().min(1, "Ledger is required"),
+    ignore_auto_number_generation: z.boolean().default(true),
+    approved: z.boolean().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.customer_sub_type === "business" && !data.company_name) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Company name is required for business customers",
+      path: ["company_name"],
+    }
+  );
+
+type CustomerType = z.infer<typeof customerSchema>;
+
+const CustomerSchema = new Schema<CustomerType>({
+  approved: { type: String, default: false },
+  company_name: {
+    type: String,
+    trim: true,
+  },
+  contact_name: {
+    required: true,
+    type: String,
+    trim: true,
+  },
+  customer_sub_type: {
+    type: String,
+    default: "individual",
+  },
+  account_id: {
+    type: String,
+    required: true,
+  },
+  contact_persons: [
+    {
+      first_name: { type: String, required: true, trim: true },
+      last_name: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      email: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      phone: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+    },
+  ],
+});
+
+export const Customer = model<CustomerType>("Customer", CustomerSchema);

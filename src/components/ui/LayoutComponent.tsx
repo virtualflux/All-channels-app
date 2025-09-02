@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import UserMenu from './UserMenu';
+import { LocalStorageHelper } from '@/lib/LocalStorageHelper';
+import { UserRole } from '@/types/user.type';
 
 export const menuItems = [
     {
@@ -54,7 +56,9 @@ const LayoutComponent = ({ children }: Readonly<{
     const pathname = usePathname();
     const router = useRouter()
     const isPathWithLayout = !routesWithoutLayout.map(item => item.path).includes(pathname)
+    const isAdmin = (LocalStorageHelper.getItem("role") ?? "staff") == UserRole.ADMIN
 
+    const shouldShowNav = isPathWithLayout && isAdmin
 
     useEffect(() => setIsOpen(false), [pathname]);
 
@@ -81,9 +85,9 @@ const LayoutComponent = ({ children }: Readonly<{
 
             <div className="grid grid-cols-12 gap-x-2">
 
-                <div className={`md:col-span-2 ${isPathWithLayout ? "block" : "hidden"} `}> <SideNav items={menuItems} isOpen={isOpen} onClose={() => setIsOpen(false)} /></div>
+                <div className={`md:col-span-2 ${shouldShowNav ? "block" : "hidden"} `}> <SideNav items={menuItems} isOpen={isOpen} onClose={() => setIsOpen(false)} /></div>
 
-                <main className={classNames("col-span-full ml-2 mr-4", { "md:col-span-10": isPathWithLayout })}>
+                <main className={classNames("col-span-full ml-2 mr-4", { "md:col-span-10": shouldShowNav })}>
                     {children}
                 </main>
             </div>

@@ -9,25 +9,31 @@ import { IAccount } from "@/types/account.type";
 import { useQuery } from "@tanstack/react-query";
 import SearchableDropdown from "../ui/SearchAbleDropdown";
 import { toFormikValidationSchema } from "zod-formik-adapter";
-import { LocalStorageHelper } from "@/lib/LocalStorageHelper";
 import { ProductType } from "@/app/api/db/products/productSchema";
+import { InventoryChartAccounts } from "@/types/zoho-inventory-chartaccounts.type";
 
 const ProductForm = () => {
-  const fetchAccounts = async (status: string) => {
+  const fetchAccounts = async () => {
     try {
-      const res = await axios.get<{ message: string; data: IAccount[] }>(
-        `/api/db/accounts?status=${status}`
+      const res = await axios.get<{ message: string; data: InventoryChartAccounts["chartofaccounts"] }>(
+        `/api/zoho/accounts`
       );
 
       return res.data.data;
-    } catch (error) {
-      toast.error("Error fetching accounts try refresh the browser please");
+    } catch (error: any) {
+      let message = "Error fetching accounts try refresh the browser please"
+      if (axios.isAxiosError(error)) {
+        console.log(error.response?.data)
+        message = error.response?.data.message
+      }
+
+      toast.error(message);
       return [];
     }
   };
   const { data, isLoading, error } = useQuery({
-    queryKey: ["accounts", "approved"],
-    queryFn: (ctx) => fetchAccounts(ctx.queryKey[1]),
+    queryKey: ["accounts"],
+    queryFn: (ctx) => fetchAccounts(),
   });
 
   const formik = useFormik<
@@ -111,11 +117,10 @@ const ProductForm = () => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.name}
-                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${
-                  formik.touched.name && formik.errors.name
-                    ? "border-red-500"
-                    : "border-zinc-300"
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${formik.touched.name && formik.errors.name
+                  ? "border-red-500"
+                  : "border-zinc-300"
+                  }`}
                 placeholder="e.g., Product Name"
               />
               {formik.touched.name && formik.errors.name ? (
@@ -142,7 +147,7 @@ const ProductForm = () => {
                 </label>
               </div>
               {formik.touched.returnable_item &&
-              formik.errors.returnable_item ? (
+                formik.errors.returnable_item ? (
                 <div className="mt-1 text-sm text-red-600">
                   {formik.errors.returnable_item}
                 </div>
@@ -186,11 +191,10 @@ const ProductForm = () => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.description}
-                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${
-                  formik.touched.description && formik.errors.description
-                    ? "border-red-500"
-                    : "border-zinc-300"
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${formik.touched.description && formik.errors.description
+                  ? "border-red-500"
+                  : "border-zinc-300"
+                  }`}
                 placeholder="Enter a description for this account"
               />
               {formik.touched.description && formik.errors.description ? (
@@ -220,11 +224,10 @@ const ProductForm = () => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.selling_price}
-                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${
-                  formik.touched.selling_price && formik.errors.selling_price
-                    ? "border-red-500"
-                    : "border-zinc-300"
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${formik.touched.selling_price && formik.errors.selling_price
+                  ? "border-red-500"
+                  : "border-zinc-300"
+                  }`}
                 placeholder=""
               />
               {formik.touched.selling_price && formik.errors.selling_price ? (
@@ -241,12 +244,12 @@ const ProductForm = () => {
                 Account
               </label>
               <SearchableDropdown
-                options={ACCOUNT_TYPES}
-                value={formik.values.unit}
+                options={(data ?? [])?.map(item => ({ name: item.account_name, value: item.account_id }))}
+                value={formik.values.sales_account}
                 onSelect={(data) => {
-                  formik.setFieldValue("unit", data.value);
+                  formik.setFieldValue("sales_account", data.value);
                 }}
-                placeholder="Select account"
+                placeholder="Select sales account"
                 className=""
               />
               {formik.touched.unit && formik.errors.unit ? (
@@ -269,16 +272,15 @@ const ProductForm = () => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.sales_description}
-                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${
-                  formik.touched.sales_description &&
+                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${formik.touched.sales_description &&
                   formik.errors.sales_description
-                    ? "border-red-500"
-                    : "border-zinc-300"
-                }`}
+                  ? "border-red-500"
+                  : "border-zinc-300"
+                  }`}
                 placeholder=""
               />
               {formik.touched.sales_description &&
-              formik.errors.sales_description ? (
+                formik.errors.sales_description ? (
                 <div className="mt-1 text-sm text-red-600">
                   {formik.errors.sales_description}
                 </div>
@@ -326,11 +328,10 @@ const ProductForm = () => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.cost_price}
-                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${
-                  formik.touched.cost_price && formik.errors.cost_price
-                    ? "border-red-500"
-                    : "border-zinc-300"
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${formik.touched.cost_price && formik.errors.cost_price
+                  ? "border-red-500"
+                  : "border-zinc-300"
+                  }`}
                 placeholder=""
               />
               {formik.touched.cost_price && formik.errors.cost_price ? (
@@ -347,12 +348,12 @@ const ProductForm = () => {
                 Account
               </label>
               <SearchableDropdown
-                options={ACCOUNT_TYPES}
-                value={formik.values.unit}
+                options={(data ?? [])?.map(item => ({ name: item.account_name, value: item.account_id }))}
+                value={formik.values.purchase_account}
                 onSelect={(data) => {
-                  formik.setFieldValue("unit", data.value);
+                  formik.setFieldValue("purchase_account", data.value);
                 }}
-                placeholder="Select account"
+                placeholder="Select purchase account"
                 className=""
               />
               {formik.touched.unit && formik.errors.unit ? (
@@ -375,16 +376,15 @@ const ProductForm = () => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.purchase_description}
-                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${
-                  formik.touched.purchase_description &&
+                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${formik.touched.purchase_description &&
                   formik.errors.purchase_description
-                    ? "border-red-500"
-                    : "border-zinc-300"
-                }`}
+                  ? "border-red-500"
+                  : "border-zinc-300"
+                  }`}
                 placeholder=""
               />
               {formik.touched.purchase_description &&
-              formik.errors.purchase_description ? (
+                formik.errors.purchase_description ? (
                 <div className="mt-1 text-sm text-red-600">
                   {formik.errors.purchase_description}
                 </div>

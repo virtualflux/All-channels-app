@@ -31,6 +31,7 @@ export const productSchema = z.object({
   purchase_tax: z.string().optional(),
 
   status: z.enum(["active", "inactive"]).default("active"),
+  returnable_item: z.boolean().default(false),
 });
 
 export type ProductType = z.infer<typeof productSchema>;
@@ -95,6 +96,10 @@ const ProductSchema = new Schema<ProductType>(
       type: String,
       enum: ["active", "inactive"],
       default: "active",
+    },
+    returnable_item: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

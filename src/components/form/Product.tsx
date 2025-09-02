@@ -10,24 +10,21 @@ import { useQuery } from "@tanstack/react-query";
 import SearchableDropdown from "../ui/SearchAbleDropdown";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 import { LocalStorageHelper } from "@/lib/LocalStorageHelper";
-import { productSchema } from "@/app/api/db/products/productSchema";
-
-
-type ProductType = z.infer<typeof productSchema>;
+import { ProductType } from "@/app/api/db/products/productSchema";
 
 const ProductForm = () => {
-    const fetchAccounts = async (status: string) => {
-      try {
-        const res = await axios.get<{ message: string; data: IAccount[] }>(
-          `/api/db/accounts?status=${status}`
-        );
+  const fetchAccounts = async (status: string) => {
+    try {
+      const res = await axios.get<{ message: string; data: IAccount[] }>(
+        `/api/db/accounts?status=${status}`
+      );
 
-        return res.data.data;
-      } catch (error) {
-        toast.error("Error fetching accounts try refresh the browser please");
-        return [];
-      }
-    };
+      return res.data.data;
+    } catch (error) {
+      toast.error("Error fetching accounts try refresh the browser please");
+      return [];
+    }
+  };
   const { data, isLoading, error } = useQuery({
     queryKey: ["accounts", "approved"],
     queryFn: (ctx) => fetchAccounts(ctx.queryKey[1]),
@@ -51,6 +48,7 @@ const ProductForm = () => {
       purchase_account: "",
       purchase_description: "",
       purchase_tax: "",
+      returnable_item: false,
     },
     // validationSchema: toFormikValidationSchema(customerSchema),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
@@ -83,11 +81,6 @@ const ProductForm = () => {
       }
     },
   });
-
-  const handleSelectAccount = (data: { name: string; value: any }) => {
-    formik.setFieldValue("account_id", data.value);
-    return;
-  };
 
   return (
     <div className="min-h-screen">
@@ -128,6 +121,30 @@ const ProductForm = () => {
               {formik.touched.name && formik.errors.name ? (
                 <div className="mt-1 text-sm text-red-600">
                   {formik.errors.name}
+                </div>
+              ) : null}
+
+              {/* returnable item checkbox */}
+              <div className="flex items-center mt-4">
+                <input
+                  id="returnable_item"
+                  name="returnable_item"
+                  type="checkbox"
+                  checked={formik.values.returnable_item}
+                  onChange={formik.handleChange}
+                  className="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
+                />
+                <label
+                  htmlFor="returnable_item"
+                  className="ml-2 block text-sm font-medium text-zinc-700"
+                >
+                  Returnable Item
+                </label>
+              </div>
+              {formik.touched.returnable_item &&
+              formik.errors.returnable_item ? (
+                <div className="mt-1 text-sm text-red-600">
+                  {formik.errors.returnable_item}
                 </div>
               ) : null}
             </div>

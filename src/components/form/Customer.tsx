@@ -170,7 +170,7 @@ const CustomerForm = () => {
                                     ? 'border-red-500'
                                     : 'border-gray-300'
                                     }`}
-                                placeholder="e.g., John Smith"
+                                placeholder="Display name for contact on zoho books..."
                             />
                             {formik.touched.contact_name && formik.errors.contact_name ? (
                                 <div className="mt-1 text-sm text-red-600">{formik.errors.contact_name}</div>
@@ -179,7 +179,7 @@ const CustomerForm = () => {
                         {(
                             <div className='col-span-6'>
                                 <label htmlFor="company_name" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Company Name <span className=' text-red-500 text-xs inline-block ml-1'>*</span>
+                                    Company Name
                                 </label>
                                 <input
                                     id="company_name"

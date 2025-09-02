@@ -53,7 +53,7 @@ export const customerSchema = z
 
 export type CustomerType = z.infer<typeof customerSchema>;
 
-const CustomerSchema = new Schema<CustomerType>(
+const CustomerSchema = new Schema<Omit<CustomerType, "contact_type">>(
   {
     createdBy: {
       type: Schema.Types.ObjectId,
@@ -104,4 +104,7 @@ const CustomerSchema = new Schema<CustomerType>(
   { timestamps: true }
 );
 
-export const Customer = model<CustomerType>("Customer", CustomerSchema);
+export const Customer = model<Omit<CustomerType, "contact_type">>(
+  "Customer",
+  CustomerSchema
+);

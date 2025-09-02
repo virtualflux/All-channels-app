@@ -12,7 +12,7 @@ export const accountSchema = z.object({
 
 export type AccountType = z.infer<typeof accountSchema>;
 
-const AccountSchema = new Schema<AccountType>(
+const AccountSchema = new Schema<AccountType & { zohoAccountId: string }>(
   {
     createdBy: {
       type: Schema.Types.ObjectId,
@@ -21,6 +21,11 @@ const AccountSchema = new Schema<AccountType>(
     account_name: {
       type: String,
       required: true,
+      trim: true,
+    },
+    zohoAccountId: {
+      type: String,
+      default: null,
       trim: true,
     },
     description: {
@@ -45,4 +50,7 @@ const AccountSchema = new Schema<AccountType>(
   { timestamps: true }
 );
 
-export default model<AccountType>("Account", AccountSchema);
+export default model<AccountType & { zohoAccountId: string }>(
+  "Account",
+  AccountSchema
+);

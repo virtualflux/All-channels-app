@@ -81,12 +81,16 @@ export async function PUT(
 
     if (status == "approved") {
       try {
-        await createZohoChartAccount({
+        const res = await createZohoChartAccount({
           account_code: account.account_code,
           account_name: account.account_name,
           account_type: account.account_type,
           description: account.description ?? "",
         });
+        if (res.data.data) {
+          const data = res.data.data;
+          account.zohoAccountId = data.id;
+        }
       } catch (error: any) {
         console.log(error.response?.data?.message);
         throw error;

@@ -6,5 +6,6 @@ export interface IAccount {
   account_type: string;
   account_code: string;
   description: string;
+  zohoAccountId: string;
   status: AccountType["status"];
 }

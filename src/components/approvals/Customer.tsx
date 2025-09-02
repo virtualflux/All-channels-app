@@ -8,15 +8,10 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { LocalStorageHelper } from '@/lib/LocalStorageHelper';
 
-import { mockCustomers } from "@/lib/data/customer"
-
 const CustomersPage = () => {
     const fetchCustomers = async () => {
         try {
-            const accessToken = LocalStorageHelper.getItem("accessToken")
-            const res = await axios.get<{ message: string; data: ICustomer[] }>("/api/db/customers", {
-                headers: { Authorization: `Bearer ${accessToken}` }
-            })
+            const res = await axios.get<{ message: string; data: ICustomer[] }>("/api/db/customers", {})
             return res.data.data
         } catch (error) {
             toast.error("Error fetching customers. Please refresh the browser.")
@@ -147,7 +142,6 @@ const CustomersPage = () => {
 
             if (response.ok) {
                 toast.success('Customer approved and created in Zoho Books successfully!');
-                // You might want to refetch the data here to update the status
             } else {
                 throw new Error('Failed to create customer in Zoho Books');
             }
@@ -201,7 +195,7 @@ const CustomersPage = () => {
                             </div>
                         </div>
                     ) : (
-                        <AppTable data={mockCustomers as ICustomer[] ?? []} columns={columns} />
+                        <AppTable data={data as ICustomer[] ?? []} columns={columns} />
                     )}
                 </div>
             </div>

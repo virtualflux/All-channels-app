@@ -1,10 +1,10 @@
 import { NextRequest } from "next/server";
 import { headers } from "next/headers";
-
 import dB from "@/lib/db/db";
 import { Customer } from "./schema";
 import { HttpStatusCode } from "axios";
 import { UserPayload as AuthPayload } from "@/types/user-payload.type";
+
 export async function GET(request: NextRequest) {
   try {
     await dB();
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   try {
     await dB();
     const hdrs = await headers();
-    console.log(JSON.stringify(hdrs, null, 2));
+
     const claims: AuthPayload = JSON.parse(hdrs.get("x-user-payload") ?? "{}");
 
     if (!claims?.userId)

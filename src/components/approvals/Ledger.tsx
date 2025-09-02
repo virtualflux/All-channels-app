@@ -6,7 +6,6 @@ import AppTable from '../ui/AppTable';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { LocalStorageHelper } from '@/lib/LocalStorageHelper';
 
 
 
@@ -31,6 +30,7 @@ const AccountsPage = () => {
     };
 
     const approveAccount = async (accountId: string) => {
+        setLoading(true)
         const body: UpdateStatusPayload = { status: "approved" };
         await axios.put(`/api/db/accounts/${accountId}`, body).then((res) => { }).catch(error => { }).finally(() => {
             setLoading(false)
@@ -39,6 +39,7 @@ const AccountsPage = () => {
     }
 
     const rejectAccount = async (accountId: string) => {
+        setLoading(true)
         const body: UpdateStatusPayload = { status: "rejected" };
         await axios.put(`/api/db/accounts/${accountId}`, body).then((res) => { }).catch(error => { }).finally(() => {
             setLoading(false)
@@ -57,11 +58,6 @@ const AccountsPage = () => {
             });
 
             if (response.ok) {
-                // Update local state
-                // setData(prev => prev.map(acc =>
-                //     acc._id === account._id ? { ...acc, status: 'approved' } : acc
-                // ));
-                // alert('Account approved and created in Zoho Books successfully!');
             } else {
                 throw new Error('Failed to create account in Zoho Books');
             }

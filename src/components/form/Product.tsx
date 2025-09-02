@@ -9,7 +9,7 @@ import { IAccount } from "@/types/account.type";
 import { useQuery } from "@tanstack/react-query";
 import SearchableDropdown from "../ui/SearchAbleDropdown";
 import { toFormikValidationSchema } from "zod-formik-adapter";
-import { ProductType } from "@/app/api/db/products/productSchema";
+import { ProductType } from "@/app/api/db/products/schema";
 import { InventoryChartAccounts } from "@/types/zoho-inventory-chartaccounts.type";
 
 const ProductForm = () => {
@@ -33,27 +33,28 @@ const ProductForm = () => {
   };
   const { data, isLoading, error } = useQuery({
     queryKey: ["accounts"],
-    queryFn: (ctx) => fetchAccounts(),
+    queryFn: fetchAccounts,
   });
 
   const formik = useFormik<
     Omit<
       ProductType,
-      "approved" | "ignore_auto_number_generation" | "status" | "createdBy"
+      "product_type" | "ignore_auto_number_generation" | "status" | "createdBy"
     >
   >({
     initialValues: {
       name: "",
       unit: "",
       description: "",
-      selling_price: 0,
-      sales_account: "",
-      sales_description: "",
-      sales_tax: "",
-      cost_price: 0,
-      purchase_account: "",
+      rate: 0,
+      account_id: "",
+      purchase_rate: 0,
+      purchase_account_id: "",
       purchase_description: "",
-      purchase_tax: "",
+      track_inventory: true,
+      inventory_valuation_method: "" as any,
+      reorder_level: 1,
+      inventory_account_id: "",
       returnable_item: true,
     },
     // validationSchema: toFormikValidationSchema(customerSchema),
@@ -62,7 +63,7 @@ const ProductForm = () => {
         const apiData = {
           ...values,
         };
-        console.log("Submitting customer values:", apiData);
+        // console.log("Submitting customer values:", apiData);
 
         await axios
           .post("/api/db/products", apiData)
@@ -129,7 +130,6 @@ const ProductForm = () => {
                 </div>
               ) : null}
 
-              {/* returnable item checkbox */}
               <div className="flex items-center mt-4">
                 <input
                   id="returnable_item"
@@ -176,11 +176,61 @@ const ProductForm = () => {
                 </div>
               ) : null}
             </div>
+            <article className="col-span-6">
+              <h1 className="text-xl font-bold text-gray-800 mb-2">
+                Sales Information
+              </h1>
 
-            <div className="col-span-full">
+              {/* selling price */}
+              <label
+                htmlFor="rate"
+                className="block text-sm font-medium text-zinc-700 mb-1 mt-2"
+              >
+                Selling Price
+              </label>
+              <input
+                id="rate"
+                name="rate"
+                type="text"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.rate}
+                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${formik.touched.rate && formik.errors.rate
+                  ? "border-red-500"
+                  : "border-zinc-300"
+                  }`}
+                placeholder=""
+              />
+              {formik.touched.rate && formik.errors.rate ? (
+                <div className="mt-1 text-sm text-red-600">
+                  {formik.errors.rate}
+                </div>
+              ) : null}
+
+              <label
+                htmlFor="account_id"
+                className="block text-sm font-medium text-zinc-700 mb-1 mt-2"
+              >
+                Account
+              </label>
+              <SearchableDropdown
+                options={(data ?? [])?.map(item => ({ name: item.account_name, value: item.account_id }))}
+                value={formik.values.account_id}
+                onSelect={(data) => {
+                  formik.setFieldValue("account_id", data.value);
+                }}
+                placeholder="Select sales account"
+                className=""
+              />
+              {formik.touched.account_id && formik.errors.account_id ? (
+                <div className="mt-1 text-sm text-red-600">
+                  {formik.errors.account_id}
+                </div>
+              ) : null}
+
               <label
                 htmlFor="description"
-                className="block text-sm font-medium text-zinc-700 mb-1"
+                className="block text-sm font-medium text-zinc-700 mb-1 mt-2"
               >
                 Description
               </label>
@@ -191,122 +241,21 @@ const ProductForm = () => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.description}
-                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${formik.touched.description && formik.errors.description
+                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${formik.touched.description &&
+                  formik.errors.description
                   ? "border-red-500"
                   : "border-zinc-300"
                   }`}
-                placeholder="Enter a description for this account"
+                placeholder=""
               />
-              {formik.touched.description && formik.errors.description ? (
+              {formik.touched.description &&
+                formik.errors.description ? (
                 <div className="mt-1 text-sm text-red-600">
                   {formik.errors.description}
                 </div>
               ) : null}
-            </div>
 
-            {/* -------------PURCHASE INFORMATION--------------- */}
-            <article className="col-span-6">
-              <h1 className="text-xl font-bold text-gray-800 mb-2">
-                Sales Information
-              </h1>
 
-              {/* selling price */}
-              <label
-                htmlFor="selling_price"
-                className="block text-sm font-medium text-zinc-700 mb-1 mt-2"
-              >
-                Selling Price
-              </label>
-              <input
-                id="selling_price"
-                name="selling_price"
-                type="text"
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                value={formik.values.selling_price}
-                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${formik.touched.selling_price && formik.errors.selling_price
-                  ? "border-red-500"
-                  : "border-zinc-300"
-                  }`}
-                placeholder=""
-              />
-              {formik.touched.selling_price && formik.errors.selling_price ? (
-                <div className="mt-1 text-sm text-red-600">
-                  {formik.errors.selling_price}
-                </div>
-              ) : null}
-
-              {/* account */}
-              <label
-                htmlFor="unit"
-                className="block text-sm font-medium text-zinc-700 mb-1 mt-2"
-              >
-                Account
-              </label>
-              <SearchableDropdown
-                options={(data ?? [])?.map(item => ({ name: item.account_name, value: item.account_id }))}
-                value={formik.values.sales_account}
-                onSelect={(data) => {
-                  formik.setFieldValue("sales_account", data.value);
-                }}
-                placeholder="Select sales account"
-                className=""
-              />
-              {formik.touched.unit && formik.errors.unit ? (
-                <div className="mt-1 text-sm text-red-600">
-                  {formik.errors.unit}
-                </div>
-              ) : null}
-
-              {/* description */}
-              <label
-                htmlFor="sales_description"
-                className="block text-sm font-medium text-zinc-700 mb-1 mt-2"
-              >
-                Description
-              </label>
-              <textarea
-                id="sales_description"
-                name="sales_description"
-                rows={3}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                value={formik.values.sales_description}
-                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${formik.touched.sales_description &&
-                  formik.errors.sales_description
-                  ? "border-red-500"
-                  : "border-zinc-300"
-                  }`}
-                placeholder=""
-              />
-              {formik.touched.sales_description &&
-                formik.errors.sales_description ? (
-                <div className="mt-1 text-sm text-red-600">
-                  {formik.errors.sales_description}
-                </div>
-              ) : null}
-
-              {/* tax */}
-              {/* <label
-                htmlFor="sales_tax"
-                className="block text-sm font-medium text-zinc-700 mb-1 mt-2"
-              >
-                Tax
-              </label>
-              <SearchableDropdown
-                options={ACCOUNT_TYPES}
-                value={formik.values.sales_tax || ""}
-                onSelect={(data) => {
-                  formik.setFieldValue("sales_tax", data.value);
-                }}
-                placeholder="Select a tax"
-                className=""
-              />
-              {formik.touched.sales_tax && formik.errors.sales_tax ? (
-                <div className="mt-1 text-sm text-red-600">
-                  {formik.errors.sales_tax}
-                </div>
-              ) : null} */}
             </article>
 
             <article className="col-span-6">
@@ -314,55 +263,52 @@ const ProductForm = () => {
                 Purchase Information
               </h1>
 
-              {/* cost price */}
               <label
-                htmlFor="cost_price"
+                htmlFor="purchase_rate"
                 className="block text-sm font-medium text-zinc-700 mb-1 mt-2"
               >
                 Cost Price
               </label>
               <input
-                id="cost_price"
-                name="cost_price"
+                id="purchase_rate"
+                name="purchase_rate"
                 type="text"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                value={formik.values.cost_price}
-                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${formik.touched.cost_price && formik.errors.cost_price
+                value={formik.values.purchase_rate}
+                className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${formik.touched.purchase_rate && formik.errors.purchase_rate
                   ? "border-red-500"
                   : "border-zinc-300"
                   }`}
                 placeholder=""
               />
-              {formik.touched.cost_price && formik.errors.cost_price ? (
+              {formik.touched.purchase_rate && formik.errors.purchase_rate ? (
                 <div className="mt-1 text-sm text-red-600">
-                  {formik.errors.cost_price}
+                  {formik.errors.purchase_rate}
                 </div>
               ) : null}
 
-              {/* account */}
               <label
-                htmlFor="unit"
+                htmlFor="purchase_account_id"
                 className="block text-sm font-medium text-zinc-700 mb-1 mt-2"
               >
                 Account
               </label>
               <SearchableDropdown
                 options={(data ?? [])?.map(item => ({ name: item.account_name, value: item.account_id }))}
-                value={formik.values.purchase_account}
+                value={formik.values.purchase_account_id}
                 onSelect={(data) => {
-                  formik.setFieldValue("purchase_account", data.value);
+                  formik.setFieldValue("purchase_account_id", data.value);
                 }}
                 placeholder="Select purchase account"
                 className=""
               />
-              {formik.touched.unit && formik.errors.unit ? (
+              {formik.touched.purchase_account_id && formik.errors.purchase_account_id ? (
                 <div className="mt-1 text-sm text-red-600">
-                  {formik.errors.unit}
+                  {formik.errors.purchase_account_id}
                 </div>
               ) : null}
 
-              {/* description */}
               <label
                 htmlFor="purchase_description"
                 className="block text-sm font-medium text-zinc-700 mb-1 mt-2"
@@ -390,28 +336,103 @@ const ProductForm = () => {
                 </div>
               ) : null}
 
-              {/* tax */}
-              {/* <label
-                htmlFor="purchase_tax"
+
+            </article>
+            <div className="flex items-center mt-4">
+              <input
+                id=""
+                name="track_inventory"
+                type="checkbox"
+                checked={formik.values.track_inventory}
+                onChange={formik.handleChange}
+                className="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
+              />
+              <label
+                htmlFor="track_inventory"
+                className="ml-2 block text-sm font-medium text-zinc-700"
+              >
+                Track Inventory
+              </label>
+            </div>
+            {formik.touched.track_inventory &&
+              formik.errors.track_inventory ? (
+              <div className="mt-1 text-sm text-red-600">
+                {formik.errors.track_inventory}
+              </div>
+            ) : null}
+
+            {formik.values.track_inventory && (<div className="w-full col-span-full grid grid-cols-6 gap-4">
+              <div className=" col-span-3">
+                <label
+                  htmlFor="inventory_account_id"
+                  className="block text-sm font-medium text-zinc-700 mb-1 mt-2"
+                >
+                  Inventory Account
+                </label>
+                <SearchableDropdown
+                  options={(data ?? [])?.map(item => ({ name: item.account_name, value: item.account_id }))}
+                  value={formik.values.inventory_account_id ?? ""}
+                  onSelect={(data) => {
+                    formik.setFieldValue("inventory_account_id", data.value);
+                  }}
+                  placeholder="Select purchase account"
+                  className=""
+                />
+                {formik.touched.inventory_account_id && formik.errors.inventory_account_id ? (
+                  <div className="mt-1 text-sm text-red-600">
+                    {formik.errors.inventory_account_id}
+                  </div>
+                ) : null}</div>
+              <div className=" col-span-3"> <label
+                htmlFor="inventory_valuation_method"
                 className="block text-sm font-medium text-zinc-700 mb-1 mt-2"
               >
-                Tax
+                Inventory Valuation Method
               </label>
-              <SearchableDropdown
-                options={ACCOUNT_TYPES}
-                value={formik.values.purchase_tax || ""}
-                onSelect={(data) => {
-                  formik.setFieldValue("purchase_tax", data.value);
-                }}
-                placeholder="Select a tax"
-                className=""
-              />
-              {formik.touched.purchase_tax && formik.errors.purchase_tax ? (
-                <div className="mt-1 text-sm text-red-600">
-                  {formik.errors.purchase_tax}
-                </div>
-              ) : null} */}
-            </article>
+                <SearchableDropdown
+                  options={[{ name: "FIFO(First In First Out)", value: "fifo" }, { name: "WAC(Weighted Average Costing)", value: "wac" }]}
+                  value={formik.values.inventory_valuation_method ?? ""}
+                  onSelect={(data) => {
+                    formik.setFieldValue("inventory_valuation_method", data.value);
+                  }}
+                  placeholder="Select valuation method"
+                  className=""
+                />
+                {formik.touched.inventory_valuation_method && formik.errors.inventory_valuation_method ? (
+                  <div className="mt-1 text-sm text-red-600">
+                    {formik.errors.inventory_valuation_method}
+                  </div>
+                ) : null}</div>
+              <div className="col-span-2">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-zinc-700 mb-1"
+                >
+                  Reorder Point
+                </label>
+                <input
+                  id="reorder_level"
+                  name="reorder_level"
+                  type="text"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.reorder_level}
+                  className={`w-full px-4 py-3 border rounded-lg  focus:border-teal-500 ${formik.touched.reorder_level && formik.errors.reorder_level
+                    ? "border-red-500"
+                    : "border-zinc-300"
+                    }`}
+                  placeholder="e.g., Product Name"
+                />
+                {formik.touched.reorder_level && formik.errors.reorder_level ? (
+                  <div className="mt-1 text-sm text-red-600">
+                    {formik.errors.reorder_level}
+                  </div>
+                ) : null}
+
+
+              </div>
+
+            </div>)}
 
             <div className="flex justify-end space-x-4 pt-4 col-span-full">
               <button

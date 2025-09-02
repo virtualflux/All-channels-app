@@ -1,11 +1,27 @@
 import dB from "@/lib/db/db";
 import { headers } from "next/headers";
 import { HttpStatusCode } from "axios";
-import Account from "../accounts/schema";
-import { Product } from "./productSchema";
+import { Product } from "./schema";
 import { NextRequest } from "next/server";
-import { IAccount } from "@/types/account.type";
 import { UserPayload as AuthPayload } from "@/types/user-payload.type";
+
+export async function GET(request: NextRequest) {
+  try {
+    await dB();
+    const product = await Product.find().exec();
+
+    return Response.json(
+      { message: "Products fetched", data: product },
+      { status: HttpStatusCode.Ok }
+    );
+  } catch (e) {
+    console.log(e);
+    return Response.json(
+      { message: "Internal Server error, customer was not fetched" },
+      { status: HttpStatusCode.InternalServerError }
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +29,6 @@ export async function POST(request: NextRequest) {
     const hdrs = await headers();
 
     const claims: AuthPayload = JSON.parse(hdrs.get("x-user-payload") ?? "{}");
-    console.log("Claims", claims)
 
     if (!claims?.userId)
       return Response.json(
@@ -22,17 +37,8 @@ export async function POST(request: NextRequest) {
       );
 
     const body = await request.json();
-    console.log("Body", body)
-    // const account: IAccount | null = await Account.findOne({
-    //   _id: body.account_id,
-    // });
+    console.log("Body", body);
 
-    // if (!account?._id) {
-    //   return Response.json(
-    //     { message: "Account was not found" },
-    //     { status: HttpStatusCode.NotFound }
-    //   );
-    // }
     const product = new Product({
       ...body,
       createdBy: claims.userId,

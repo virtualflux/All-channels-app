@@ -9,10 +9,10 @@ import { UserRole } from "@/types/user.type";
 
 export const menuItems = [
     { id: "customer", title: "Create Customer", description: "Add new customers", path: "/form/customer" },
-    { id: "product", title: "Create a Product", description: "", path: "/form/product" },
+    { id: "product", title: "Create Product", description: "", path: "/form/product" },
     { id: "pricelist", title: "Create Price List", description: "Add price list", path: "/form/pricelist" },
-    { id: "customerReport", title: "Customers Approval", description: "Manage customers created by staff", path: "/approvals/customer", isAdminRoute: true },
-    { id: "priceApproval", title: "Price List Approval", description: "Manage price approval created by staff", path: "/approvals/pricelist", isAdminRoute: true },
+    { id: "customerReport", title: "Approve Customers", description: "Manage customers created by staff", path: "/approvals/customer", isAdminRoute: true },
+    { id: "priceApproval", title: "Approve Price List", description: "Manage price approval created by staff", path: "/approvals/pricelist", isAdminRoute: true },
     { id: "productApproval", title: "Approve Product", description: "", path: "/approvals/product", isAdminRoute: true },
 ];
 

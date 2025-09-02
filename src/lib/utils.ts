@@ -18,3 +18,9 @@ export function generateAccessToken(payload: UserPayload) {
   const accessToken = jwt.sign(payload, process.env.SECRET_KEY || "");
   return accessToken;
 }
+
+export const currencyFmt = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "NGN",
+  maximumFractionDigits: 2,
+});

@@ -18,7 +18,7 @@ const SearchableDropdown = ({
     noOptionsText?: string;
     disabled?: boolean
     required?: boolean
-    className: string;
+    className?: string;
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');

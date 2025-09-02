@@ -28,20 +28,20 @@ const menuItems = [
         path: '/form/prices'
     }, {
         id: "customerReport",
-        title: "Customers Report",
+        title: "Customers Approval",
         description: "Manage customers created by staff",
         path: "/approvals/customer",
         isAdminRoute: true
     }, {
-        id: "accountReport",
-        title: "Accounts Report",
+        id: "accountApproval",
+        title: "Accounts Approval",
         description: "Manage accounts created by staff",
         path: "/approvals/account",
         isAdminRoute: true
     }, {
-        id: "priceReport",
-        title: "Price List Report",
-        description: "Manage price list created by staff",
+        id: "priceApproval",
+        title: "Price List Approval",
+        description: "Manage price approval created by staff",
         path: "/approvals/pricelist",
         isAdminRoute: true
     }

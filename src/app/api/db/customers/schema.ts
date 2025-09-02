@@ -37,6 +37,10 @@ export const customerSchema = z
     account_id: z.string().min(1, "Ledger is required"),
     ignore_auto_number_generation: z.boolean().default(true),
     status: z.enum(["pending", "rejected", "approved"]),
+    account_name: z.string().min(1, "account name is required"),
+    account_code: z.string().min(1, "account code is required"),
+    account_type: z.string().min(1, "account type is required"),
+    description: z.string().optional(),
   })
   .refine(
     (data) => {

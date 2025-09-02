@@ -23,14 +23,14 @@ type Props = {
 
 export default function SideNav({ items, storageKey = "role", isOpen, onClose }: Props) {
     const pathname = usePathname();
-    const [isCeo, setCeo] = useState(false);
+    const [isAdmin, setAdmin] = useState(false);
 
     const checkRole = () => {
         try {
             if (typeof window === "undefined") return;
-            setCeo(localStorage.getItem(storageKey) == UserRole.CEO);
+            setAdmin(localStorage.getItem(storageKey) == UserRole.ADMIN);
         } catch {
-            setCeo(false);
+            setAdmin(false);
         }
     };
 
@@ -60,7 +60,7 @@ export default function SideNav({ items, storageKey = "role", isOpen, onClose }:
     }, [pathname]);
 
 
-    const mobileVisible = isCeo && isOpen;
+    const mobileVisible = isAdmin && isOpen;
 
     // Core panel classes (mobile drawer + md sidebar)
     const panelClass = [

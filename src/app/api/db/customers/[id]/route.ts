@@ -81,17 +81,17 @@ export async function PUT(
 
     if (status == "approved") {
       try {
-        await createZohoCustomer({
-          customer_sub_type: customer.customer_sub_type,
-          company_name: customer.company_name,
-          contact_type: "customer",
-          contact_name: customer.contact_name,
-          contact_persons: [
-            { ...customer.contact_persons[0], is_primary_contact: true },
-          ],
-          account_id: customer.account_id,
-          ignore_auto_number_generation: false,
-        });
+        // await createZohoCustomer({
+        //   customer_sub_type: customer.customer_sub_type,
+        //   company_name: customer.company_name,
+        //   contact_type: "customer",
+        //   contact_name: customer.contact_name,
+        //   contact_persons: [
+        //     { ...customer.contact_persons[0], is_primary_contact: true },
+        //   ],
+        //   account_id: customer.account_id,
+        //   ignore_auto_number_generation: false,
+        // });
       } catch (error: any) {
         console.log(error.response?.data?.message);
         throw error;
@@ -124,7 +124,7 @@ async function createZohoCustomer(
 ) {
   const accessToken = await ZohoTokenHelper.getAccessToken();
   const response = await AxiosService.post(
-    `/contacts?organization_id=${process.env.ZOHO_ORG_ID}`,
+    `books/v3/contacts?organization_id=${process.env.ZOHO_ORG_ID}`,
     dto,
     {
       headers: {

@@ -26,19 +26,19 @@ const Dashboard = () => {
             path: '/form/prices'
         }, {
             id: "customerReport",
-            title: "Customers Report",
+            title: "Customers Approval",
             description: "Manage customers created by staff",
             path: "/approvals/customer",
             isAdminRoute: true
         }, {
             id: "accountReport",
-            title: "Accounts Report",
+            title: "Accounts Approval",
             description: "Manage accounts created by staff",
             path: "/approvals/account",
             isAdminRoute: true
         }, {
             id: "priceReport",
-            title: "Price List Report",
+            title: "Price List Approval",
             description: "Manage price list created by staff",
             path: "/approvals/pricelist",
             isAdminRoute: true
@@ -52,7 +52,7 @@ const Dashboard = () => {
     const filteredItems = useMemo(() => {
         const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
         if (role == null) return menuItems
-        if (role === "ceo") return menuItems;
+        if (role === "admin") return menuItems;
         return menuItems.filter((item) => !item.isAdminRoute);
 
     }, [menuItems]);

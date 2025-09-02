@@ -19,7 +19,7 @@ function isPublic(req: NextRequest) {
 }
 
 // Example: CEO-only section
-function isCeoRoute(req: NextRequest) {
+function isAdminRoute(req: NextRequest) {
   return req.nextUrl.pathname.startsWith("/approvals");
 }
 
@@ -68,7 +68,7 @@ export default async function middleware(req: NextRequest) {
     const role = payload.role as UserRole | undefined;
 
     // Example authorization check for CEO-only section
-    if (isCeoRoute(req) && role !== UserRole.CEO) {
+    if (isAdminRoute(req) && role !== UserRole.ADMIN) {
       return NextResponse.json(
         { message: "User is not allowed here" },
         { status: HttpStatusCode.Forbidden }

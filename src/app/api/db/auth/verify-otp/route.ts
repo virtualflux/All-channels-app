@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       userId: user._id.toString(),
     });
     // console.log({ accessToken });
-    const maxAge = 1 * 60;
+    const maxAge = 60 * 60;
 
     (await cookies()).set("accessToken", accessToken, {
       httpOnly: true,

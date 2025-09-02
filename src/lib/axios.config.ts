@@ -34,7 +34,7 @@ const errorInterceptor = async (res: AxiosResponse<any>) => {
   return res;
 };
 
-const baseUrl = "https://www.zohoapis.com/books/v3";
+const baseUrl = "https://www.zohoapis.com/";
 export const AxiosService = axios.create({
   baseURL: baseUrl,
 });

@@ -32,7 +32,7 @@ const AccountsPage = () => {
     const approveAccount = async (accountId: string) => {
         setLoading(true)
         const body: UpdateStatusPayload = { status: "approved" };
-        await axios.put(`/api/db/accounts/${accountId}`, body).then((res) => { }).catch(error => { }).finally(() => {
+        await axios.put(`/api/db/accounts/${accountId}`, body).then((res) => { toast.success("Approved successfully") }).catch(error => { }).finally(() => {
             setLoading(false)
         });
         return
@@ -41,7 +41,7 @@ const AccountsPage = () => {
     const rejectAccount = async (accountId: string) => {
         setLoading(true)
         const body: UpdateStatusPayload = { status: "rejected" };
-        await axios.put(`/api/db/accounts/${accountId}`, body).then((res) => { }).catch(error => { }).finally(() => {
+        await axios.put(`/api/db/accounts/${accountId}`, body).then((res) => { toast.success("Rejected account") }).catch(error => { }).finally(() => {
             setLoading(false)
         });
     }

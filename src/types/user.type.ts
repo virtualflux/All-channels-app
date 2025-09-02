@@ -8,6 +8,6 @@ export interface IUser extends mongoose.Document {
 }
 
 export enum UserRole {
-  CEO = "ceo",
+  ADMIN = "admin",
   STAFF = "staff",
 }

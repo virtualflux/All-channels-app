@@ -122,7 +122,7 @@ async function createZohoChartAccount(
 ) {
   const accessToken = await ZohoTokenHelper.getAccessToken();
   const response = await AxiosService.post(
-    `/chartofaccounts?organization_id=${process.env.ZOHO_ORG_ID}`,
+    `books/v3/chartofaccounts?organization_id=${process.env.ZOHO_ORG_ID}`,
     dto,
     {
       headers: {

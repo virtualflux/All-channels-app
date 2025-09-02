@@ -48,10 +48,8 @@ const AuthComponent = () => {
                 email, code: otp
             }).then((res) => {
                 console.log({ res })
-                const accessToken = res.data.accessToken
                 const role = res.data.role
                 LocalStorageHelper.setItem("role", role)
-                LocalStorageHelper.setItem("accessToken", accessToken)
 
                 toast.success("Login successful")
                 router.push("/dashboard");

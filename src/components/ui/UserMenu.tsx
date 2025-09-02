@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { LocalStorageHelper } from "@/lib/LocalStorageHelper";
 
 export default function UserMenu() {
     const [open, setOpen] = useState(false);
@@ -27,6 +28,7 @@ export default function UserMenu() {
     const logout = async () => {
         try {
             await axios.post("/api/db/auth/logout");
+            LocalStorageHelper.clearItems()
             toast.success("Logout successful");
             router.replace("/");
         } catch (err) {

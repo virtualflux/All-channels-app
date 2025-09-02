@@ -64,6 +64,7 @@ export default async function middleware(req: NextRequest) {
 
   try {
     const payload = await verifyJWT(token);
+    console.log({ payload });
     const role = payload.role as UserRole | undefined;
 
     // Example authorization check for CEO-only section
@@ -88,13 +89,11 @@ export default async function middleware(req: NextRequest) {
     // (Optional) Sliding cookie expiry (NOTE: this does NOT extend a JWT's exp)
     // If you want the cookie to expire later, set maxAge; but if JWT is expired,
     // jwtVerify will still fail on next request.
-    res.cookies.set(AUTH_COOKIE, token, {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      // secure: process.env.NODE_ENV === "production",
-      // maxAge: 60 * 60, // example 1h
-    });
+    // res.cookies.set(AUTH_COOKIE, token, {
+    //   httpOnly: true,
+    //   sameSite: "lax",
+    //   path: "/",
+    // });
 
     return res;
   } catch (err: any) {
@@ -105,7 +104,9 @@ export default async function middleware(req: NextRequest) {
       name === "JWTExpired" ||
       name === "ERR_JWT_EXPIRED" ||
       /exp/i.test(String(err?.message));
+    console.log({ expired });
 
+    console.log({ isApi: isApi(req) });
     const res = isApi(req)
       ? NextResponse.json(
           { error: expired ? "TokenExpired" : "Unauthorized" },
@@ -121,6 +122,7 @@ export default async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     "/approvals/:path*",
+    "/form/:path*",
     "/api/db/accounts/:path*",
     "/api/db/customers/:path*",
     // add more protected areas or simply: "/api/:path*", "/(?!_next|favicon\\.ico).*"

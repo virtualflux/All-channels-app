@@ -20,4 +20,10 @@ export class LocalStorageHelper {
   static isBrowser() {
     return typeof window !== undefined;
   }
+
+  static clearItems() {
+    if (this.isBrowser()) {
+      localStorage.clear();
+    }
+  }
 }

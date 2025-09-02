@@ -8,13 +8,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import UserMenu from './UserMenu';
 
-const menuItems = [
-    {
-        id: 'ledger',
-        title: 'Create Account',
-        description: 'Create an account',
-        path: '/form/ledger'
-    },
+export const menuItems = [
     {
         id: 'customer',
         title: 'Create Customer',
@@ -22,10 +16,16 @@ const menuItems = [
         path: '/form/customer'
     },
     {
-        id: 'prices',
-        title: 'Upload Price List',
-        description: 'Import and update product pricing',
-        path: '/form/prices'
+        id: "product",
+        title: "Create a Product",
+        description: "",
+        path: "/form/product"
+    },
+    {
+        id: 'pricelist',
+        title: 'Create Price List',
+        description: 'Add price list',
+        path: '/form/pricelist'
     }, {
         id: "customerReport",
         title: "Customers Approval",
@@ -33,18 +33,17 @@ const menuItems = [
         path: "/approvals/customer",
         isAdminRoute: true
     }, {
-        id: "accountApproval",
-        title: "Accounts Approval",
-        description: "Manage accounts created by staff",
-        path: "/approvals/account",
-        isAdminRoute: true
-    }, {
         id: "priceApproval",
         title: "Price List Approval",
         description: "Manage price approval created by staff",
         path: "/approvals/pricelist",
         isAdminRoute: true
-    }
+    }, {
+        id: "productApproval",
+        title: "Approve Product",
+        description: "",
+        path: "/approvals/product"
+    },
 ];
 const routesWithoutLayout = [{ name: "auth", path: "/" }, { name: "dashboard", path: "/dashboard" }]
 

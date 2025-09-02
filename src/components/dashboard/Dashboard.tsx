@@ -1,49 +1,12 @@
 "use client"
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react';
+import { menuItems } from '../ui/LayoutComponent';
 
 const Dashboard = () => {
     const [activeMenu, setActiveMenu] = useState<null | string>(null);
     const router = useRouter()
 
-    const menuItems = [
-        {
-            id: 'ledger',
-            title: 'Create Account',
-            description: 'Create an account',
-            path: '/form/ledger'
-        },
-        {
-            id: 'customer',
-            title: 'Create Customer',
-            description: 'Add new customers',
-            path: '/form/customer'
-        },
-        {
-            id: 'prices',
-            title: 'Upload Price List',
-            description: 'Import and update product pricing',
-            path: '/form/prices'
-        }, {
-            id: "customerReport",
-            title: "Customers Approval",
-            description: "Manage customers created by staff",
-            path: "/approvals/customer",
-            isAdminRoute: true
-        }, {
-            id: "accountReport",
-            title: "Accounts Approval",
-            description: "Manage accounts created by staff",
-            path: "/approvals/account",
-            isAdminRoute: true
-        }, {
-            id: "priceReport",
-            title: "Price List Approval",
-            description: "Manage price list created by staff",
-            path: "/approvals/pricelist",
-            isAdminRoute: true
-        }
-    ];
 
     const handleNavigation = (path: string) => {
         router.push(path);

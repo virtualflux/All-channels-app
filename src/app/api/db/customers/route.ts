@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
   } catch (e) {
     console.log(e);
     return Response.json(
-      { message: "Internal Server error, customer was not fetched" },
+      { message: "Internal Server error, customer was not added" },
       { status: HttpStatusCode.InternalServerError }
     );
   }

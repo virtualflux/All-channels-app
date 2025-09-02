@@ -54,7 +54,7 @@ const ProductForm = () => {
       purchase_account: "",
       purchase_description: "",
       purchase_tax: "",
-      returnable_item: false,
+      returnable_item: true,
     },
     // validationSchema: toFormikValidationSchema(customerSchema),
     onSubmit: async (values, { setSubmitting, resetForm }) => {

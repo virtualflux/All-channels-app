@@ -1,29 +1,30 @@
-export class LocalStorageHelper {
-  static getItem(key: string) {
-    if (this.isBrowser()) {
-      return localStorage.getItem(key);
-    }
-    return undefined;
-  }
 
-  /**
-   *
-   * @param key
-   * @param value
-   */
-  static setItem(key: string, value: string) {
-    if (this.isBrowser()) {
-      localStorage.setItem(key, value);
-    }
-  }
+// export class LocalStorageHelper {
+//   static getItem(key: string) {
+//     if (window && this.isBrowser()) {
+//       return window.localStorage.getItem(key) ?? "";
+//     }
+//     return undefined;
+//   }
 
-  static isBrowser() {
-    return typeof window !== undefined;
-  }
+//   /**
+//    *
+//    * @param key
+//    * @param value
+//    */
+//   static setItem(key: string, value: string) {
+//     if (window && this.isBrowser()) {
+//       window.localStorage.setItem(key, value);
+//     }
+//   }
 
-  static clearItems() {
-    if (this.isBrowser()) {
-      localStorage.clear();
-    }
-  }
-}
+//   static isBrowser() {
+//     return typeof window !== undefined;
+//   }
+
+//   static clearItems() {
+//     if (window && this.isBrowser()) {
+//       window.localStorage.clear();
+//     }
+//   }
+// }

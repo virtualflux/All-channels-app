@@ -19,7 +19,7 @@ export const customerSchema = z
   .object({
     createdBy: z.string().transform((args, ctx) => new mongo.ObjectId(args)),
 
-    contact_type: z.literal("customer"),
+    contact_type: z.string(),
     customer_sub_type: z.enum(["individual", "business", "other"], {
       errorMap: () => ({ message: "Customer sub type is required" }),
     }),
@@ -66,19 +66,17 @@ const CustomerSchema = new Schema<Omit<CustomerType, "contact_type">>(
     company_name: {
       type: String,
       trim: true,
+      lowercase: true,
     },
     contact_name: {
       required: true,
       type: String,
       trim: true,
+      lowercase: true,
     },
     customer_sub_type: {
       type: String,
       default: "individual",
-    },
-    account_id: {
-      type: String,
-      required: true,
     },
     contact_persons: [
       {
@@ -100,6 +98,21 @@ const CustomerSchema = new Schema<Omit<CustomerType, "contact_type">>(
         },
       },
     ],
+    account_name: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      required: true,
+    },
+    account_code: { type: String, trim: true, unique: true },
+    account_type: {
+      type: String,
+      lowercase: true,
+      required: true,
+    },
+    description: {
+      type: String,
+    },
     status: {
       type: String,
       default: "pending",

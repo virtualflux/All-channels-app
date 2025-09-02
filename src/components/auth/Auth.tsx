@@ -8,7 +8,6 @@ import { FormEvent, useState } from 'react'; import {
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
-import { LocalStorageHelper } from '@/lib/LocalStorageHelper';
 
 const AuthComponent = () => {
     const router = useRouter()
@@ -49,7 +48,7 @@ const AuthComponent = () => {
             }).then((res) => {
                 console.log({ res })
                 const role = res.data.role
-                LocalStorageHelper.setItem("role", role)
+                localStorage.setItem("role", role)
 
                 toast.success("Login successful")
                 router.push("/dashboard");

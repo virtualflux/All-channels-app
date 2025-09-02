@@ -8,6 +8,7 @@ import { Customer, CustomerType } from "../schema";
 import type { UserPayload } from "@/types/user-payload.type";
 import { ZohoTokenHelper } from "@/lib/zoho-token-helper";
 import { AxiosService } from "@/lib/axios.config";
+import { AccountType } from "../../accounts/schema";
 
 const BodySchema = z.object({
   status: z.enum(["pending", "approved", "rejected"]),
@@ -81,17 +82,40 @@ export async function PUT(
 
     if (status == "approved") {
       try {
-        // await createZohoCustomer({
-        //   customer_sub_type: customer.customer_sub_type,
-        //   company_name: customer.company_name,
-        //   contact_type: "customer",
-        //   contact_name: customer.contact_name,
-        //   contact_persons: [
-        //     { ...customer.contact_persons[0], is_primary_contact: true },
-        //   ],
-        //   account_id: customer.account_id,
-        //   ignore_auto_number_generation: false,
-        // });
+        const account = await createZohoChartAccount({
+          account_name: customer.account_name,
+          account_type: customer.account_type,
+          account_code: customer.account_code,
+          description: customer.description,
+        });
+
+        // console.log({ data: JSON.stringify(account?.data, null, 2) });
+
+        if (account?.data) {
+          const accountId = account.data.chart_of_account.account_id;
+
+          const customerPayload = {
+            customer_sub_type: customer.customer_sub_type,
+            company_name: customer.company_name,
+            contact_type: "customer",
+            contact_name: customer.contact_name,
+            contact_persons: [
+              {
+                first_name: customer.contact_persons[0].first_name,
+                last_name: customer.contact_persons[0].last_name,
+                email: customer.contact_persons[0].email,
+                phone: customer.contact_persons[0].phone,
+                is_primary_contact: true,
+              },
+            ],
+            account_id: accountId,
+            ignore_auto_number_generation: false,
+          };
+          console.log({
+            customerData: JSON.stringify(customerPayload, null, 2),
+          });
+          await createZohoCustomer(customerPayload);
+        }
       } catch (error: any) {
         console.log(error.response?.data?.message);
         throw error;
@@ -120,11 +144,30 @@ export async function PUT(
 }
 
 async function createZohoCustomer(
-  dto: Omit<CustomerType, "createdBy" | "status">
+  dto: Omit<
+    CustomerType,
+    "createdBy" | "status" | "account_name" | "account_type" | "account_code"
+  >
 ) {
   const accessToken = await ZohoTokenHelper.getAccessToken();
   const response = await AxiosService.post(
     `books/v3/contacts?organization_id=${process.env.ZOHO_ORG_ID}`,
+    dto,
+    {
+      headers: {
+        Authorization: `Zoho-oauthtoken ${accessToken}`,
+      },
+    }
+  );
+  return response;
+}
+
+async function createZohoChartAccount(
+  dto: Omit<AccountType, "createdBy" | "status">
+) {
+  const accessToken = await ZohoTokenHelper.getAccessToken();
+  const response = await AxiosService.post(
+    `books/v3/chartofaccounts?organization_id=${process.env.ZOHO_ORG_ID}`,
     dto,
     {
       headers: {

@@ -7,7 +7,10 @@ export interface ICustomer {
   company_name?: string;
   contact_name: string;
   customer_sub_type: string;
-  account_id: string;
+  account_name: string;
+  account_type: string;
+  account_code: string;
+  description: string;
   contact_persons: {
     first_name: string;
     last_name: string;

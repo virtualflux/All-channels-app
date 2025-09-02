@@ -6,7 +6,6 @@ import AppTable from '../ui/AppTable';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { LocalStorageHelper } from '@/lib/LocalStorageHelper';
 
 const CustomersPage = () => {
     const fetchCustomers = async () => {
@@ -19,10 +18,32 @@ const CustomersPage = () => {
         }
     }
 
-    const { data, isLoading, error } = useQuery({
+    const { data, isLoading, error, refetch } = useQuery({
         queryKey: ["customers"],
         queryFn: fetchCustomers
     })
+    const [loading, setLoading] = useState(false)
+
+    type UpdateStatusPayload = {
+        status: "pending" | "approved" | "rejected";
+    };
+
+    const approveCustomer = async (customerId: string) => {
+        setLoading(true)
+        const body: UpdateStatusPayload = { status: "approved" };
+        await axios.put(`/api/db/customers/${customerId}`, body).then((res) => { toast.success("Approved successfully"); refetch(); }).catch(error => { }).finally(() => {
+            setLoading(false)
+        });
+
+    }
+
+    const rejectCustomer = async (customerId: string) => {
+        setLoading(true)
+        const body: UpdateStatusPayload = { status: "rejected" };
+        await axios.put(`/api/db/customers/${customerId}`, body).then((res) => { toast.success("Rejected account"); refetch(); }).catch(error => { }).finally(() => {
+            setLoading(false)
+        });
+    }
 
     const columns = [
         {
@@ -73,8 +94,8 @@ const CustomersPage = () => {
             },
         },
         {
-            accessorKey: 'account_id',
-            header: 'Account ID',
+            accessorKey: 'account_name',
+            header: 'Account',
             cell: (info: any) => info.getValue(),
         },
         {
@@ -100,22 +121,34 @@ const CustomersPage = () => {
             id: 'actions',
             header: 'Actions',
             cell: (info: any) => {
-                const customer = info.row.original;
+                const customer: ICustomer = info.row.original;
                 return (
                     <div className="flex space-x-2">
                         {customer.status === 'pending' && (
                             <>
                                 <button
-                                    onClick={() => handleApprove(customer)}
+                                    disabled={loading}
+                                    onClick={() => approveCustomer(customer._id)}
                                     className="px-3 py-1 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                                 >
-                                    Approve
+                                    {loading ? <span className="flex items-center">
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </span> : "Approve"}
                                 </button>
                                 <button
-                                    onClick={() => handleReject(customer._id)}
+                                    disabled={loading}
+                                    onClick={() => rejectCustomer(customer._id)}
                                     className="px-3 py-1 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                                 >
-                                    Reject
+                                    {loading ? <span className="flex items-center">
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </span> : "Reject"}
                                 </button>
                             </>
                         )}
@@ -128,50 +161,6 @@ const CustomersPage = () => {
         },
     ]
 
-    const handleApprove = async (customer: ICustomer) => {
-        try {
-            const accessToken = LocalStorageHelper.getItem("accessToken");
-            const response = await fetch('/api/zoho/create-customer', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
-                },
-                body: JSON.stringify(customer),
-            });
-
-            if (response.ok) {
-                toast.success('Customer approved and created in Zoho Books successfully!');
-            } else {
-                throw new Error('Failed to create customer in Zoho Books');
-            }
-        } catch (error) {
-            console.error('Error approving customer:', error);
-            toast.error('Error approving customer. Please try again.');
-        }
-    };
-
-    const handleReject = async (customerId: string) => {
-        try {
-            const accessToken = LocalStorageHelper.getItem("accessToken");
-            const response = await fetch(`/api/db/customers/${customerId}/reject`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`
-                },
-            });
-
-            if (response.ok) {
-                toast.success('Customer rejected successfully!');
-                // Refetch data to update the status
-            } else {
-                throw new Error('Failed to reject customer');
-            }
-        } catch (error) {
-            console.error('Error rejecting customer:', error);
-            toast.error('Error rejecting customer. Please try again.');
-        }
-    };
 
     return (
         <div className="min-h-screen">

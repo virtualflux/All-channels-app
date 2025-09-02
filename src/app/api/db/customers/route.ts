@@ -39,20 +39,11 @@ export async function POST(request: NextRequest) {
       );
     const body = await request.json();
     const contact_persons = body.contact_persons;
-    const account: IAccount | null = await Account.findOne({
-      _id: body.account_id,
-    });
-    if (!account?._id) {
-      return Response.json(
-        { message: "Account was not found" },
-        { status: HttpStatusCode.NotFound }
-      );
-    }
+
     const customer = new Customer({
       ...body,
       contact_persons: contact_persons,
       createdBy: claims.userId,
-      account_id: account.zohoAccountId,
     });
 
     await customer.save();

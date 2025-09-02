@@ -1,0 +1,17 @@
+export const UNIT_TYPES: { name: string; value: string }[] = [
+  { name: "box", value: "box" },
+  { name: "cm", value: "cm" },
+  { name: "dz", value: "dz" },
+  { name: "ft", value: "ft" },
+  { name: "g", value: "g" },
+  { name: "in", value: "in" },
+  { name: "kg", value: "kg" },
+  { name: "km", value: "km" },
+  { name: "lg", value: "lg" },
+  { name: "mg", value: "mg" },
+  { name: "ml", value: "ml" },
+  { name: "m", value: "m" },
+  { name: "pcs", value: "pcs" },
+  { name: "packs", value: "packs" },
+  { name: "schts", value: "schts" },
+];

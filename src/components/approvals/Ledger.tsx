@@ -1,54 +1,79 @@
 "use client"
 import { useMemo, useState } from 'react';
-import {
-    useReactTable,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    flexRender,
-} from '@tanstack/react-table';
 import { z } from 'zod';
-import { IAccount } from '../../../types/account.type';
+import { IAccount } from '../../types/account.type';
 import AppTable from '../ui/AppTable';
 import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { LocalStorageHelper } from '@/lib/LocalStorageHelper';
 
 
 
-
-
-const mockAccounts: IAccount[] = [
-    {
-        _id: '1',
-        account_name: 'Operating Bank Account',
-        account_code: '1001',
-        account_type: 'bank',
-        description: 'Primary business operating account',
-        status: 'pending',
-
-    },
-    {
-        _id: '2',
-        account_name: 'Accounts Receivable',
-        account_code: '1200',
-        account_type: 'current_assets',
-        description: 'Customer outstanding payments',
-        status: 'pending',
-    },
-    {
-        _id: '3',
-        account_name: 'Office Equipment',
-        account_code: '1500',
-        account_type: 'fixed_assets',
-        description: 'Computers, furniture, and office equipment',
-        status: 'approved',
-    },
-];
 
 const AccountsPage = () => {
-    const [data, setData] = useState<IAccount[]>(mockAccounts);
+    const fetchAccounts = async () => {
+        try {
+            const res = await axios.get<{ message: string; data: IAccount[] }>("/api/db/accounts",)
+            return res.data.data
+        } catch (error) {
+            toast.error("Error fetching accounts try refresh the browser please")
+            return []
+        }
+    }
+    const { data, isLoading, error } = useQuery({ queryKey: ["accounts"], queryFn: fetchAccounts })
+    const [loading, setLoading] = useState(false)
 
-    const { } = useQuery({ queryKey: [""] })
+
+
+    type UpdateStatusPayload = {
+        status: "pending" | "approved" | "rejected";
+    };
+
+    const approveAccount = async (accountId: string) => {
+        const body: UpdateStatusPayload = { status: "approved" };
+        await axios.put(`/api/db/accounts/${accountId}`, body).then((res) => { }).catch(error => { }).finally(() => {
+            setLoading(false)
+        });
+        return
+    }
+
+    const rejectAccount = async (accountId: string) => {
+        const body: UpdateStatusPayload = { status: "rejected" };
+        await axios.put(`/api/db/accounts/${accountId}`, body).then((res) => { }).catch(error => { }).finally(() => {
+            setLoading(false)
+        });
+    }
+
+    const handleApprove = async (account: IAccount) => {
+
+        try {
+            const response = await fetch('/api/zoho/create-account', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(account),
+            });
+
+            if (response.ok) {
+                // Update local state
+                // setData(prev => prev.map(acc =>
+                //     acc._id === account._id ? { ...acc, status: 'approved' } : acc
+                // ));
+                // alert('Account approved and created in Zoho Books successfully!');
+            } else {
+                throw new Error('Failed to create account in Zoho Books');
+            }
+        } catch (error) {
+            console.error('Error approving account:', error);
+            alert('Error approving account. Please try again.');
+        } finally {
+        }
+    };
+
+
+
 
     const columns = [
         {
@@ -104,16 +129,16 @@ const AccountsPage = () => {
                         {account.status === 'pending' && (
                             <>
                                 <button
-                                    onClick={() => handleApprove(account)}
+                                    onClick={() => approveAccount(account._id)}
                                     className="px-3 py-1 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                // disabled={isLoading}
+                                    disabled={loading}
                                 >
                                     Approve
                                 </button>
                                 <button
-                                    onClick={() => handleReject(account.id)}
+                                    onClick={() => rejectAccount(account._id)}
                                     className="px-3 py-1 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                                // disabled={isLoading}
+                                    disabled={loading}
                                 >
                                     Reject
                                 </button>
@@ -128,53 +153,6 @@ const AccountsPage = () => {
         },
     ]
 
-    const handleApprove = async (account: IAccount) => {
-
-        try {
-            const response = await fetch('/api/zoho/create-account', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(account),
-            });
-
-            if (response.ok) {
-                // Update local state
-                setData(prev => prev.map(acc =>
-                    acc._id === account._id ? { ...acc, status: 'approved' } : acc
-                ));
-                alert('Account approved and created in Zoho Books successfully!');
-            } else {
-                throw new Error('Failed to create account in Zoho Books');
-            }
-        } catch (error) {
-            console.error('Error approving account:', error);
-            alert('Error approving account. Please try again.');
-        } finally {
-        }
-    };
-
-    const handleReject = async (accountId: string) => {
-
-        try {
-            // Simulate API call to reject account
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            // Update local state
-            setData(prev => prev.map(acc =>
-                acc._id === accountId ? { ...acc, status: 'rejected' } : acc
-            ));
-
-            alert('Account rejected successfully!');
-        } catch (error) {
-            console.error('Error rejecting account:', error);
-            alert('Error rejecting account. Please try again.');
-        } finally {
-
-        }
-    };
-
     return (
         <div className="min-h-screen">
             <div className="max-w-7xl mx-auto">
@@ -184,8 +162,24 @@ const AccountsPage = () => {
                 </div>
 
                 <div className="bg-white rounded-xl shadow-lg p-6">
+                    {
+                        isLoading ? <div className='flex flex-col gap-2'>
+                            <div className=' w-full my-2 h-8 p-2 bg-gray-300 animate-pulse'></div>
+                            <div className='grid grid-cols-3 gap-2'>
 
-                    <AppTable data={mockAccounts} columns={columns} />
+                                <div className=' w-full h-12 p-4 bg-gray-300 animate-pulse'></div>
+                                <div className=' w-full h-12 p-2 bg-gray-300 animate-pulse'></div>
+                                <div className=' w-full h-12 p-2 bg-gray-300 animate-pulse'></div>
+
+                                <div className=' w-full h-12 p-2 bg-gray-300 animate-pulse'></div>
+
+                                <div className=' w-full h-12 p-2 bg-gray-300 animate-pulse'></div>
+
+                                <div className=' w-full h-12 p-2 bg-gray-300 animate-pulse'></div>
+                            </div>
+                        </div> :
+                            <AppTable data={data as IAccount[] ?? []} columns={columns} />
+                    }
 
                 </div>
             </div>

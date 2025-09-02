@@ -9,7 +9,6 @@ const emailConfig = {
     pass: process.env.EMAIL_PASSWORD,
   },
 };
-console.log({ emailConfig });
 
 const transporter = nodemailer.createTransport(emailConfig);
 

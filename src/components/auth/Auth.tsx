@@ -8,6 +8,7 @@ import { FormEvent, useState } from 'react'; import {
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
+import { LocalStorageHelper } from '@/lib/LocalStorageHelper';
 
 const AuthComponent = () => {
     const router = useRouter()
@@ -29,14 +30,15 @@ const AuthComponent = () => {
             }).then((res) => {
                 toast.success("OTP sent to your provided email")
                 setIsEmailSubmitted(true)
-                if (res.status !== 200) {
-                    let message = res?.data?.message
-                    toast.error(message)
-                }
-            }).catch((error) => {
-                console.log(error)
 
+            }).catch((error) => {
                 let message = "Something went wrong"
+                console.log(error)
+                if (axios.isAxiosError(error)) {
+                    message = error.response?.data?.message || error.message
+
+                }
+
                 toast.error(message)
             }).finally(() => setIsLoading(false))
             return
@@ -46,20 +48,24 @@ const AuthComponent = () => {
                 email, code: otp
             }).then((res) => {
                 console.log({ res })
+                const accessToken = res.data.accessToken
+                const role = res.data.role
+                LocalStorageHelper.setItem("role", role)
+                LocalStorageHelper.setItem("accessToken", accessToken)
+
                 toast.success("Login successful")
-                if (res.status !== 200) {
-                    let message = res?.data?.message
-                    toast.error(message)
-                    return
-                }
                 router.push("/dashboard");
             }).catch((error) => {
                 let message = "Something went wrong"
                 if (axios.isAxiosError(error)) {
-                    message = error.response?.data || error.message
+                    message = error.response?.data?.message || error.message
                 }
                 toast.error(message)
-            }).finally(() => setIsLoading(false))
+            }).finally(() => {
+                setIsLoading(false);
+                const event = new Event("user-role-updated")
+                window.dispatchEvent(event)
+            })
         }
 
 

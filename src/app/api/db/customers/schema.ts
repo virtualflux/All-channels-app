@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Schema, model } from "mongoose";
+import { Schema, model, mongo } from "mongoose";
 
 export const contactPersonSchema = z.object({
   first_name: z
@@ -17,6 +17,8 @@ export const contactPersonSchema = z.object({
 
 export const customerSchema = z
   .object({
+    createdBy: z.string().transform((args, ctx) => new mongo.ObjectId(args)),
+
     contact_type: z.literal("customer"),
     customer_sub_type: z.enum(["individual", "business", "other"], {
       errorMap: () => ({ message: "Customer sub type is required" }),
@@ -34,7 +36,7 @@ export const customerSchema = z
       .max(100, "Contact name must be 100 characters or less"),
     account_id: z.string().min(1, "Ledger is required"),
     ignore_auto_number_generation: z.boolean().default(true),
-    approvedAt: z.date(),
+    status: z.enum(["pending", "rejected", "approved"]),
   })
   .refine(
     (data) => {
@@ -49,10 +51,14 @@ export const customerSchema = z
     }
   );
 
-type CustomerType = z.infer<typeof customerSchema>;
+export type CustomerType = z.infer<typeof customerSchema>;
 
 const CustomerSchema = new Schema<CustomerType>(
   {
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
     company_name: {
       type: String,
       trim: true,
@@ -90,9 +96,9 @@ const CustomerSchema = new Schema<CustomerType>(
         },
       },
     ],
-    approvedAt: {
-      type: Date,
-      default: null,
+    status: {
+      type: String,
+      default: "pending",
     },
   },
   { timestamps: true }

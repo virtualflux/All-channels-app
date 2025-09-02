@@ -1,6 +1,6 @@
 "use client"
 import { useRouter } from 'next/navigation'
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 const Dashboard = () => {
     const [activeMenu, setActiveMenu] = useState<null | string>(null);
@@ -9,7 +9,7 @@ const Dashboard = () => {
     const menuItems = [
         {
             id: 'ledger',
-            title: 'Create Ledger',
+            title: 'Create Account',
             description: 'Create an account',
             path: '/form/ledger'
         },
@@ -24,12 +24,37 @@ const Dashboard = () => {
             title: 'Upload Price List',
             description: 'Import and update product pricing',
             path: '/form/prices'
+        }, {
+            id: "customerReport",
+            title: "Customers Report",
+            description: "Manage customers created by staff",
+            path: "/approvals/customer",
+            isAdminRoute: true
+        }, {
+            id: "accountReport",
+            title: "Accounts Report",
+            description: "Manage accounts created by staff",
+            path: "/approvals/account",
+            isAdminRoute: true
+        }, {
+            id: "priceReport",
+            title: "Price List Report",
+            description: "Manage price list created by staff",
+            path: "/approvals/pricelist",
+            isAdminRoute: true
         }
     ];
 
     const handleNavigation = (path: string) => {
         router.push(path);
     };
+
+    const filteredItems = useMemo(() => {
+        const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
+        if (role === "ceo") return menuItems;
+        return menuItems.filter((item) => !item.isAdminRoute);
+
+    }, [menuItems]);
 
     return (
         <div className="min-h-screen" >
@@ -47,7 +72,7 @@ const Dashboard = () => {
 
                     <div className="p-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {menuItems.map((item) => (
+                            {filteredItems.map((item) => (
                                 <div
                                     key={item.id}
                                     className={`border rounded-lg p-5 transition-all duration-200 cursor-pointer hover:shadow-md ${activeMenu === item.id
@@ -61,7 +86,6 @@ const Dashboard = () => {
                                     <div className="flex flex-col items-center text-center h-full">
                                         <div className={`p-3 rounded-full mb-4 ${activeMenu === item.id ? 'bg-teal-100' : 'bg-gray-100'
                                             }`}>
-                                            {/* Flat Icons for each menu item */}
                                             {item.id === 'ledger' && (
                                                 <svg className={`h-8 w-8 ${activeMenu === item.id ? 'text-teal-600' : 'text-gray-600'
                                                     }`} viewBox="0 0 24 24" fill="currentColor">

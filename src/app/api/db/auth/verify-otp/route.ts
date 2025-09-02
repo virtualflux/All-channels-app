@@ -4,6 +4,7 @@ import { HttpStatusCode } from "axios";
 import { User } from "../../users/schema";
 import Token from "@/app/api/db/token/schema";
 import { generateAccessToken } from "@/lib/utils";
+import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,10 +43,20 @@ export async function POST(request: NextRequest) {
     const accessToken = generateAccessToken({
       email: user.email,
       role: user.role,
+      userId: user._id.toString(),
     });
     // console.log({ accessToken });
+    const maxAge = 1 * 60;
+
+    (await cookies()).set("accessToken", accessToken, {
+      httpOnly: true,
+      //   secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge,
+    });
     return Response.json(
-      { message: "Login successful", accessToken },
+      { message: "Login successful", accessToken, role: user.role },
       { status: HttpStatusCode.Ok }
     );
   } catch (e) {

@@ -4,6 +4,11 @@ import { z } from 'zod';
 import { toFormikValidationSchema } from 'zod-formik-adapter';
 import SearchableDropdown from '../ui/SearchAbleDropdown';
 import { contactPersonSchema, customerSchema } from '@/app/api/db/customers/schema';
+import { LocalStorageHelper } from '@/lib/LocalStorageHelper';
+import axios from 'axios';
+import { IAccount } from '@/types/account.type';
+import { useQuery } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 const CUSTOMER_SUB_TYPES = [
     { name: "Individual", value: "individual" },
@@ -20,7 +25,21 @@ type CustomerType = z.infer<typeof customerSchema>
 type ContactPersonField = keyof ContactPersonType
 
 const CustomerForm = () => {
-    const formik = useFormik<Omit<CustomerType, "approved" | "ignore_auto_number_generation" | "approvedAt">>({
+
+    const fetchAccounts = async () => {
+        try {
+            const res = await axios.get<{ message: string; data: IAccount[] }>("/api/db/accounts",)
+
+            return res.data.data
+        } catch (error) {
+            toast.error("Error fetching accounts try refresh the browser please")
+            return []
+        }
+    }
+    const { data, isLoading, error } = useQuery({ queryKey: ["accounts"], queryFn: fetchAccounts })
+
+
+    const formik = useFormik<Omit<CustomerType, "approved" | "ignore_auto_number_generation" | "status" | "createdBy">>({
         initialValues: {
             contact_type: 'customer',
             customer_sub_type: "individual",
@@ -40,11 +59,24 @@ const CustomerForm = () => {
                         ...(person.phone ? {} : { phone: undefined })
                     }))
                 };
-
                 console.log('Submitting customer values:', apiData);
 
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await axios.post("/api/db/customers", apiData)
+                    .then((res) => {
+                        console.log(res)
+                        toast.success("Customer created successfully")
+                    })
+                    .catch(error => {
+                        if (axios.isAxiosError(error)) {
+                            const message = error.response?.data?.message ||
+                                error.message
+                            toast.error(message)
+                            return
+                        }
+                        toast.error("Could not submit form , Please try again")
+
+                    });
+
 
                 resetForm();
             } catch (error) {
@@ -54,6 +86,14 @@ const CustomerForm = () => {
             }
         },
     });
+
+    const handleSelectAccount = (data: {
+        name: string;
+        value: any;
+    }) => {
+        formik.setFieldValue("account_id", data.value)
+        return
+    }
 
     // const addContactPerson = () => {
     //     formik.setFieldValue('contact_persons', [
@@ -125,7 +165,6 @@ const CustomerForm = () => {
                                 name="contact_name"
                                 type="text"
                                 onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
                                 value={formik.values.contact_name}
                                 className={`w-full p-2 border rounded-lg focus:ring-1 focus:ring-teal-500 focus:border-teal-500 ${formik.touched.contact_name && formik.errors.contact_name
                                     ? 'border-red-500'
@@ -147,7 +186,6 @@ const CustomerForm = () => {
                                     name="company_name"
                                     type="text"
                                     onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
                                     value={formik.values.company_name}
                                     className={`w-full p-2 border rounded-lg focus:ring-1 focus:ring-teal-500 focus:border-teal-500 ${formik.touched.company_name && formik.errors.company_name
                                         ? 'border-red-500'
@@ -166,9 +204,10 @@ const CustomerForm = () => {
                                 Account <span className=' text-red-500 text-xs inline-block ml-1'>*</span>
                             </label>
                             <SearchableDropdown
-                                options={[]}
+                                options={(data ?? [])!.map(item => ({ name: item.account_name, value: item._id }))}
+                                isLoading={isLoading}
                                 value={formik.values.account_id}
-                                onSelect={(data) => { }}
+                                onSelect={handleSelectAccount}
                                 placeholder="Select an account"
                                 className=''
                             />
@@ -215,7 +254,7 @@ const CustomerForm = () => {
                                                 type="text"
                                                 value={person.first_name}
                                                 onChange={(e) => handleContactPersonChange(index, 'first_name', e.target.value)}
-                                                onBlur={formik.handleBlur}
+
                                                 className={`w-full p-2 border rounded-lg focus:ring-1 focus:ring-teal-500 focus:border-teal-500 ${formik.touched.contact_persons?.[index]?.first_name &&
                                                     formik.errors.contact_persons?.[index].toString()
                                                     ? 'border-red-500'
@@ -239,7 +278,7 @@ const CustomerForm = () => {
                                                 type="text"
                                                 value={person.last_name}
                                                 onChange={(e) => handleContactPersonChange(index, 'last_name', e.target.value)}
-                                                onBlur={formik.handleBlur}
+
                                                 className={`w-full p-2 border rounded-lg focus:ring-1 focus:ring-teal-500 focus:border-teal-500 ${formik.touched.contact_persons?.[index]?.last_name &&
                                                     formik.errors.contact_persons?.[index]?.toString()
                                                     ? 'border-red-500'
@@ -263,7 +302,7 @@ const CustomerForm = () => {
                                                 type="email"
                                                 value={person.email}
                                                 onChange={(e) => handleContactPersonChange(index, 'email', e.target.value)}
-                                                onBlur={formik.handleBlur}
+
                                                 className={`w-full p-2 border rounded-lg focus:ring-1 focus:ring-teal-500 focus:border-teal-500 ${formik.touched.contact_persons?.[index]?.email &&
                                                     formik.errors.contact_persons?.[index]?.toString
                                                     ? 'border-red-500'
@@ -287,7 +326,7 @@ const CustomerForm = () => {
                                                 type="text"
                                                 value={person.phone}
                                                 onChange={(e) => handleContactPersonChange(index, 'phone', e.target.value)}
-                                                onBlur={formik.handleBlur}
+
                                                 className={`w-full p-2 border rounded-lg focus:ring-1 focus:ring-teal-500 focus:border-teal-500 ${formik.touched.contact_persons?.[index]?.phone &&
                                                     formik.errors.contact_persons?.[index]?.toString()
                                                     ? 'border-red-500'

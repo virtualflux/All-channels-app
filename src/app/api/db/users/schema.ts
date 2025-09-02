@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { IUser, UserRole } from "../../../../../types/user.type";
+import { IUser, UserRole } from "../../../../types/user.type";
 
 /* Userschema will correspond to a collection in your MongoDB database. */
 const UserSchema = new mongoose.Schema<IUser>(

@@ -6,32 +6,33 @@ import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const ACCOUNT_TYPES = [
-    { name: 'Cash (Asset)', value: 'Cash' },
-    { name: 'Bank (Asset)', value: 'Bank' },
-    { name: 'Fixed Asset (Asset)', value: 'Fixed Asset' },
-    { name: 'Stock (Asset)', value: 'Stock' },
-    { name: 'Accounts Receivable (Asset)', value: 'Accounts Receivable' },
-    { name: 'Deferred Tax Asset (Asset)', value: 'Deferred Tax Asset' },
-    { name: 'Other Asset (Asset)', value: 'Other Asset' },
-    { name: 'Other Current Assets (Asset)', value: 'Other Current Assets' },
-    { name: 'Payment Clearing (Asset)', value: 'Payment Clearing' },
+export const ACCOUNT_TYPES: { name: string; value: string }[] = [
+    { name: 'Cash (Asset)', value: 'cash' },
+    { name: 'Bank (Asset)', value: 'bank' },
+    { name: 'Fixed Asset (Asset)', value: 'fixed_asset' },
+    { name: 'Stock (Asset)', value: 'stock' },                      // see note
+    { name: 'Accounts Receivable (Asset)', value: 'accounts_receivable' },
+    { name: 'Deferred Tax Asset (Asset)', value: 'deferred_tax_asset' }, // see note
+    { name: 'Other Asset (Asset)', value: 'other_asset' },
+    { name: 'Other Current Assets (Asset)', value: 'other_current_asset' }, // singular "asset"
+    { name: 'Payment Clearing (Asset)', value: 'payment_clearing' },  // see note
 
-    { name: 'Accounts Payable (Liability)', value: 'Accounts Payable' },
-    { name: 'Deferred Tax Liability (Liability)', value: 'Deferred Tax Liability' },
-    { name: 'Credit Card (Liability)', value: 'Credit Card' },
-    { name: 'Long Term Liability (Liability)', value: 'Long Term Liability' },
-    { name: 'Other Liability (Liability)', value: 'Other Liability' },
-    { name: 'Other Current Liability (Liability)', value: 'Other Current Liability' },
-    { name: 'Overseas Tax Payable (Liability)', value: 'Overseas Tax Payable' },
+    { name: 'Accounts Payable (Liability)', value: 'accounts_payable' },
+    { name: 'Deferred Tax Liability (Liability)', value: 'deferred_tax_liability' }, // see note
+    { name: 'Credit Card (Liability)', value: 'credit_card' },
+    { name: 'Long Term Liability (Liability)', value: 'long_term_liability' },
+    { name: 'Other Liability (Liability)', value: 'other_liability' },
+    { name: 'Other Current Liability (Liability)', value: 'other_current_liability' },
+    { name: 'Overseas Tax Payable (Liability)', value: 'overseas_tax_payable' }, // see note
 
-    { name: 'Equity', value: 'Equity' },
+    { name: 'Equity', value: 'equity' },
 
-    { name: 'Income', value: 'Income' },
-    { name: 'Other Income', value: 'Other Income' },
+    { name: 'Income', value: 'income' },
+    { name: 'Other Income', value: 'other_income' },
 
-    { name: 'Expense', value: 'Expense' },
+    { name: 'Expense', value: 'expense' },
 ];
+
 const LedgerForm = () => {
     // const { mutate, error, isPending, isSuccess } = useMutation({
     //     mutationFn: async (data: Omit<AccountType, "approvedAt">) => {

@@ -4,10 +4,8 @@ import { headers } from "next/headers";
 import { Types } from "mongoose";
 import { z } from "zod";
 import dB from "@/lib/db/db";
-import Account, { AccountType } from "../schema";
+import { Customer } from "../schema";
 import type { UserPayload } from "@/types/user-payload.type";
-import { ZohoTokenHelper } from "@/lib/zoho-token-helper";
-import { AxiosService } from "@/lib/axios.config";
 
 const BodySchema = z.object({
   status: z.enum(["pending", "approved", "rejected"]),
@@ -21,17 +19,17 @@ export async function GET(
     const { id } = await params;
 
     if (!Types.ObjectId.isValid(id)) {
-      return Response.json({ message: "Invalid account id" }, { status: 400 });
+      return Response.json({ message: "Invalid customer id" }, { status: 400 });
     }
 
     await dB();
-    const account = await Account.findById(id);
-    if (!account) {
-      return Response.json({ message: "Account not found" }, { status: 404 });
+    const customer = await Customer.findById(id);
+    if (!customer) {
+      return Response.json({ message: "Customer not found" }, { status: 404 });
     }
 
     return Response.json(
-      { message: "Account fetched", data: account },
+      { message: "Customer fetched", data: customer },
       { status: HttpStatusCode.Ok }
     );
   } catch (e: any) {
@@ -51,7 +49,7 @@ export async function PUT(
     const { id } = await params;
 
     if (!Types.ObjectId.isValid(id)) {
-      return Response.json({ message: "Invalid account id" }, { status: 400 });
+      return Response.json({ message: "Invalid customer id" }, { status: 400 });
     }
 
     await dB();
@@ -68,34 +66,21 @@ export async function PUT(
     const body = await req.json();
     const { status } = BodySchema.parse(body);
 
-    const account = await Account.findOne({ _id: id, status: "pending" });
+    const updated = await Customer.findOneAndUpdate(
+      { _id: id, status: "pending" },
+      { $set: { status } },
+      { new: true }
+    );
 
-    if (!account) {
+    if (!updated) {
       return Response.json(
-        { message: "Account not found" },
+        { message: "Customer not found" },
         { status: HttpStatusCode.NotFound }
       );
     }
 
-    account.status = status;
-
-    if (status == "approved") {
-      try {
-        await createZohoChartAccount({
-          account_code: account.account_code,
-          account_name: account.account_name,
-          account_type: account.account_type,
-          description: account.description ?? "",
-        });
-      } catch (error: any) {
-        console.log(error.response?.data?.message);
-        throw error;
-      }
-    }
-
-    await account.save();
     return Response.json(
-      { message: "Account status updated", data: account },
+      { message: "Customer status updated", data: updated },
       { status: HttpStatusCode.Ok }
     );
   } catch (e: any) {
@@ -113,18 +98,4 @@ export async function PUT(
   }
 }
 
-async function createZohoChartAccount(
-  dto: Omit<AccountType, "createdBy" | "status">
-) {
-  const accessToken = await ZohoTokenHelper.getAccessToken();
-  const response = await AxiosService.post(
-    `/chartofaccounts?organization_id=${process.env.ZOHO_ORG_ID}`,
-    dto,
-    {
-      headers: {
-        Authorization: `Zoho-oauthtoken ${accessToken}`,
-      },
-    }
-  );
-  return response;
-}
+async function createZohoCustomer() {}

@@ -1,11 +1,13 @@
 import { NextRequest } from "next/server";
 import dB from "@/lib/db/db";
 import { HttpStatusCode } from "axios";
-import Account from "./schema";
+import Account, { AccountType } from "./schema";
 import { mongo } from "mongoose";
 import { headers } from "next/headers";
 import { UserPayload } from "@/types/user-payload.type";
 import { UserRole } from "@/types/user.type";
+import { ZohoTokenHelper } from "@/lib/zoho-token-helper";
+import { AxiosService } from "@/lib/axios.config";
 
 const ALLOWED_STATUSES = new Set<"pending" | "approved" | "rejected">([
   "pending",

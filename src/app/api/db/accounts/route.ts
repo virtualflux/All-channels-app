@@ -2,12 +2,11 @@ import { NextRequest } from "next/server";
 import dB from "@/lib/db/db";
 import { HttpStatusCode } from "axios";
 import Account, { AccountType } from "./schema";
-import { mongo } from "mongoose";
+import { FilterQuery, mongo } from "mongoose";
 import { headers } from "next/headers";
 import { UserPayload } from "@/types/user-payload.type";
 import { UserRole } from "@/types/user.type";
-import { ZohoTokenHelper } from "@/lib/zoho-token-helper";
-import { AxiosService } from "@/lib/axios.config";
+import { IAccount } from "@/types/account.type";
 
 const ALLOWED_STATUSES = new Set<"pending" | "approved" | "rejected">([
   "pending",
@@ -17,9 +16,13 @@ const ALLOWED_STATUSES = new Set<"pending" | "approved" | "rejected">([
 
 export async function GET(request: NextRequest) {
   try {
+    const filter: FilterQuery<IAccount> = {};
     const query = request.nextUrl.searchParams;
+    const status = query.get("status");
+
+    if (status) filter.status = status;
     await dB();
-    const accounts = await Account.find({});
+    const accounts = await Account.find({ ...filter });
 
     return Response.json(
       {

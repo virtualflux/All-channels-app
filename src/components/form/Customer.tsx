@@ -26,9 +26,9 @@ type ContactPersonField = keyof ContactPersonType
 
 const CustomerForm = () => {
 
-    const fetchAccounts = async () => {
+    const fetchAccounts = async (status: string) => {
         try {
-            const res = await axios.get<{ message: string; data: IAccount[] }>("/api/db/accounts",)
+            const res = await axios.get<{ message: string; data: IAccount[] }>(`/api/db/accounts?status=${status}`)
 
             return res.data.data
         } catch (error) {
@@ -36,7 +36,7 @@ const CustomerForm = () => {
             return []
         }
     }
-    const { data, isLoading, error } = useQuery({ queryKey: ["accounts"], queryFn: fetchAccounts })
+    const { data, isLoading, error } = useQuery({ queryKey: ["accounts", "approved"], queryFn: (ctx) => fetchAccounts(ctx.queryKey[1]) })
 
 
     const formik = useFormik<Omit<CustomerType, "approved" | "ignore_auto_number_generation" | "status" | "createdBy">>({

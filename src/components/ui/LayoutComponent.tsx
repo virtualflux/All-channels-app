@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react';
 import SideNav from '../approvals/SideNav'
 import { usePathname } from 'next/navigation';
 import classNames from 'classnames';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import UserMenu from './UserMenu';
 
 const menuItems = [
     {
@@ -49,7 +53,7 @@ const LayoutComponent = ({ children }: Readonly<{
 }>) => {
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
-
+    const router = useRouter()
     const isPathWithLayout = !routesWithoutLayout.map(item => item.path).includes(pathname)
 
 
@@ -72,6 +76,8 @@ const LayoutComponent = ({ children }: Readonly<{
     return (
 
         <div className="min-h-screen">
+            <UserMenu />
+
             {isPathWithLayout && TopBar}
 
             <div className="grid grid-cols-12 gap-x-2">

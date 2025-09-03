@@ -91,10 +91,7 @@ const AuthComponent = () => {
 
 
     };
-
-    setIsLoading(true);
-
-
+    
     return (
         <div className="flex items-center justify-center min-h-screen">
             <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">

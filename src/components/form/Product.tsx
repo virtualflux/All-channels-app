@@ -338,7 +338,7 @@ const ProductForm = () => {
 
 
             </article>
-            <div className="flex items-center mt-4">
+            <div className="flex items-center mt-4 col-span-6">
               <input
                 id=""
                 name="track_inventory"

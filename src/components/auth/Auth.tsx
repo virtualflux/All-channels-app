@@ -81,18 +81,12 @@ const AuthComponent = () => {
                 window.dispatchEvent(event)
             })
         }
-
-
-
-
-        // console.log({ email, otp })
         return
 
 
 
     };
 
-    setIsLoading(true);
 
 
     return (

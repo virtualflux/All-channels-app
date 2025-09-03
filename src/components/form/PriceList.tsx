@@ -22,7 +22,7 @@ const PRICEBOOK_TYPES = [
     { name: "Per Item", value: "per_item" },
 ];
 
-const ROUNDING_TYPES = [
+export const ROUNDING_TYPES = [
     { name: "Never mind", value: "no_rounding" },
     { name: "Nearest Whole Number", value: "round_to_dollar" },
     { name: "0.99", value: "round_to_dollar_minus_01" },
@@ -31,26 +31,6 @@ const ROUNDING_TYPES = [
 ];
 
 type CurrencyRow = { currency_id: string; currency_code: string; currency_name?: string };
-type ItemRow = { item_id: string; name: string };
-
-type FixedPercentageState = {
-    pricebook_type: "fixed_percentage";
-    is_increase: boolean;
-    percentage: number;
-};
-
-type PerItemState = {
-    pricebook_type: "per_item";
-    pricebook_items: Array<{ item_id: string; pricebook_rate: number }>;
-};
-
-type CommonState = {
-    name: string;
-    description?: string;
-    currency_id: string;
-    sales_or_purchase_type: "sales" | "purchases";
-    rounding_type: (typeof ROUNDING_TYPES)[number]["value"];
-};
 
 interface FormState {
     name: string;
@@ -61,7 +41,7 @@ interface FormState {
     pricebook_type: string;
     is_increase?: "markup" | "markdown";
     percentage?: number;
-    pricebook_items?: Array<{ item_id: string; pricebook_rate: number }>;
+    pricebook_items?: Array<{ item_id: string; pricebook_rate: number; item_name: string; }>;
 
 }
 
@@ -309,7 +289,7 @@ export const PriceListForm = () => {
 
                                 </div>
 
-                                {/* <div className="md:col-span-full">
+                                <div className="md:col-span-6 -mt-12">
                                     <label className="block text-sm font-medium text-zinc-700 mb-1">Percentage</label>
                                     <input
                                         id="percentage"
@@ -331,7 +311,7 @@ export const PriceListForm = () => {
                                             {(formik.errors as any).percentage as string}
                                         </div>
                                     )}
-                                </div> */}
+                                </div>
                             </>
 
                         }
@@ -361,7 +341,7 @@ export const PriceListForm = () => {
                                                         value={row.item_id}
                                                         onSelect={(opt) => {
                                                             const rows = [...(formik.values.pricebook_items ?? [])];
-                                                            rows[idx] = { ...rows[idx], item_id: opt.value };
+                                                            rows[idx] = { ...rows[idx], item_id: opt.value, item_name: opt.name };
                                                             formik.setFieldValue("pricebook_items", rows);
                                                         }}
                                                         placeholder="Select item"

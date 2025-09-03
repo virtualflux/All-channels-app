@@ -16,7 +16,7 @@ export const priceListSchema = z.object({
     "round_to_half_dollar_minus_01",
   ]),
   status: z.enum(["pending", "rejected", "approved"]),
-  pricebook_type: z.literal("per_item"),
+  pricebook_type: z.string(),
   pricebook_items: z
     .array(
       z.object({
@@ -81,7 +81,9 @@ const PriceListSchema = new Schema<Omit<PriceListType, "">>(
       type: Boolean,
     },
     percentage: { type: Number },
-    pricebook_items: [{ item_id: String, pricebook_rate: Number }],
+    pricebook_items: [
+      { item_id: String, pricebook_rate: Number, item_name: String },
+    ],
     status: {
       type: String,
       default: "pending",

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { HttpStatusCode } from "axios";
 import { headers } from "next/headers";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { z } from "zod";
 import dB from "@/lib/db/db";
 import { Customer, CustomerType } from "../schema";
@@ -9,6 +9,9 @@ import type { UserPayload } from "@/types/user-payload.type";
 import { ZohoTokenHelper } from "@/lib/zoho-token-helper";
 import { AxiosService } from "@/lib/axios.config";
 import { AccountType } from "../../accounts/schema";
+import { IUser } from "@/types/user.type";
+import { sendStatusMail } from "@/lib/email-service";
+import { ICustomer } from "@/types/customer.type";
 
 const BodySchema = z.object({
   status: z.enum(["pending", "approved", "rejected"]),
@@ -69,7 +72,11 @@ export async function PUT(
     const body = await req.json();
     const { status } = BodySchema.parse(body);
 
-    const customer = await Customer.findOne({ _id: id, status: "pending" });
+    const customer: ICustomer & mongoose.Document = (await Customer.findOne(
+      { _id: id, status: "pending" },
+      {},
+      { populate: ["createdBy"] }
+    )) as ICustomer & mongoose.Document;
 
     if (!customer) {
       return Response.json(
@@ -77,6 +84,8 @@ export async function PUT(
         { status: HttpStatusCode.NotFound }
       );
     }
+
+    const createdByUser: IUser = customer.createdBy as unknown as IUser;
 
     customer.status = status;
 
@@ -114,7 +123,7 @@ export async function PUT(
           console.log({
             customerData: JSON.stringify(customerPayload, null, 2),
           });
-          await createZohoCustomer(customerPayload);
+          await createZohoCustomer(customerPayload as any);
         }
       } catch (error: any) {
         console.log(error.response?.data?.message);
@@ -123,6 +132,17 @@ export async function PUT(
     }
 
     await customer.save();
+
+    if (createdByUser.email) {
+      await sendStatusMail(createdByUser.email, {
+        status: status as any,
+        itemType: "Customer",
+        itemName: customer.company_name ?? "",
+        actorName: createdByUser.fullName,
+        decisionAt: customer.updatedAt as any,
+        submittedAt: customer.createdAt,
+      });
+    }
 
     return Response.json(
       { message: "Customer status updated", data: customer },

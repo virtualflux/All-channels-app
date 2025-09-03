@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { headers } from "next/headers";
 import dB from "@/lib/db/db";
 import { UserPayload } from "@/types/user-payload.type";
@@ -7,6 +7,9 @@ import { PriceList } from "../schema";
 import { HttpStatusCode } from "axios";
 import { ZohoTokenHelper } from "@/lib/zoho-token-helper";
 import { AxiosService } from "@/lib/axios.config";
+import { IPriceList } from "@/types/pricelist.type";
+import { IUser } from "@/types/user.type";
+import { sendStatusMail } from "@/lib/email-service";
 
 interface ZohoPriceBook {
   name: string;
@@ -57,7 +60,13 @@ export async function PUT(
     const body = await req.json();
     const { status } = body;
 
-    const priceList = await PriceList.findOne({ _id: id });
+    const priceList: IPriceList & mongoose.Document = (await PriceList.findOne(
+      {
+        _id: id,
+      },
+      {},
+      { populate: ["createdBy"] }
+    )) as IPriceList & mongoose.Document;
 
     if (!priceList) {
       return Response.json(
@@ -66,13 +75,15 @@ export async function PUT(
       );
     }
 
+    const createdByUser: IUser = priceList.createdBy as unknown as IUser;
+
     if (status === "approved") {
       try {
         const zohoPriceBookPayload: ZohoPriceBook = {
           name: priceList.name,
           description: priceList.description,
           currency_id: priceList.currency_id,
-          sales_or_purchase_type: priceList.sales_or_purchase_type,
+          sales_or_purchase_type: priceList.sales_or_purchase_type as any,
           pricebook_type: priceList.pricebook_type as any,
           rounding_type: priceList.rounding_type,
           status: "active",
@@ -88,7 +99,7 @@ export async function PUT(
           }),
         };
 
-        console.log({ payload: JSON.stringify(zohoPriceBookPayload, null, 2) });
+        // console.log({ payload: JSON.stringify(zohoPriceBookPayload, null, 2) });
 
         const createdPriceBook = await createZohoPriceBook(
           zohoPriceBookPayload
@@ -110,7 +121,19 @@ export async function PUT(
     }
 
     priceList.status = status;
+
     await priceList.save();
+
+    if (createdByUser.email) {
+      await sendStatusMail(createdByUser.email, {
+        status: status as any,
+        itemType: "Price list",
+        itemName: priceList.name ?? "",
+        actorName: createdByUser.fullName,
+        decisionAt: priceList.updatedAt as any,
+        submittedAt: priceList.createdAt,
+      });
+    }
 
     return Response.json(
       { message: "PriceList status updated successfully", data: priceList },

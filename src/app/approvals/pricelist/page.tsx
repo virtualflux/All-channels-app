@@ -28,16 +28,11 @@ export default async function Index() {
         );
     } catch (error: any) {
         if (axios.isAxiosError(error)) {
-            console.log(error.response?.data);
-            return Response.json(
-                {
-                    message:
-                        error.response?.data?.message ||
-                        error.message ||
-                        "Internal server error",
-                },
-                { status: error.response?.status || 500 }
-            );
+            let message =
+                error.response?.data?.message ||
+                error.message ||
+                "Internal server error"
+            return <div className="w-full"><p className=" text-center">{message}</p></div>
         }
         return <>
             <div className="w-full"><p className=" text-center">Error fetching data</p></div>

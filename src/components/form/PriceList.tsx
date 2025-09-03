@@ -162,10 +162,14 @@ export const PriceListForm = () => {
     );
 
     const itemOptions = useMemo(
-        () => items.map((item) => ({ name: item.name, value: item.item_id })),
+        () => items.map((item) => ({ name: item.name, value: item.item_id.toString() })),
         [items]
     );
 
+
+    useEffect(() => {
+        console.log("items:", formik.values.pricebook_items)
+    }, [formik.values.pricebook_items])
 
     return (
         <div className="min-h-screen">
@@ -331,17 +335,22 @@ export const PriceListForm = () => {
                                     </button>
                                 </div>
 
-                                <div className="space-y-3 border border-zinc-200 rounded-md min-h-20">
-                                    {((formik.values.pricebook_items ?? [])).map(
+                                <div className="space-y-3 border border-zinc-100 rounded-md min-h-20">
+                                    {(formik.values.pricebook_items ?? []).map(
                                         (row: { item_id: string; pricebook_rate: number }, idx: number) => (
-                                            <div key={row.item_id} className="grid grid-cols-12 gap-2">
+                                            <div key={`${idx}-${String(row.item_id ?? "")}`} className="grid grid-cols-12 gap-2">
                                                 <div className="col-span-7">
                                                     <SearchableDropdown
-                                                        options={itemOptions}
-                                                        value={row.item_id}
+                                                        options={itemOptions.map(o => ({ ...o, value: String(o.value) }))}
+                                                        value={String(row.item_id ?? "")}
                                                         onSelect={(opt) => {
+                                                            console.log({ opt })
                                                             const rows = [...(formik.values.pricebook_items ?? [])];
-                                                            rows[idx] = { ...rows[idx], item_id: opt.value, item_name: opt.name };
+                                                            rows[idx] = {
+                                                                ...rows[idx],
+                                                                item_id: String(opt.value),
+                                                                item_name: opt.name,
+                                                            }
                                                             formik.setFieldValue("pricebook_items", rows);
                                                         }}
                                                         placeholder="Select item"

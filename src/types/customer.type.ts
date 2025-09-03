@@ -3,7 +3,7 @@ import { Types } from "mongoose";
 
 export interface ICustomer {
   _id: string;
-  createdBy?: string;
+  createdBy: string;
   company_name?: string;
   contact_name: string;
   customer_sub_type: string;

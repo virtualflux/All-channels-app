@@ -10,6 +10,7 @@ import { ZohoTokenHelper } from "@/lib/zoho-token-helper";
 import { AxiosService } from "@/lib/axios.config";
 import { IUser } from "@/types/user.type";
 import { sendStatusMail } from "@/lib/email-service";
+import User from "../../users/schema";
 
 interface ZohoInventoryItem {
   name: string;
@@ -58,11 +59,7 @@ export async function PUT(
 
     const { status } = body;
 
-    const product = (await Product.findOne(
-      { _id: id },
-      {},
-      { populate: ["createdBy"] }
-    )) as ProductType & {
+    const product = (await Product.findOne({ _id: id })) as ProductType & {
       createdAt: string;
       updatedAt: string;
     } & mongoose.Document;
@@ -74,8 +71,9 @@ export async function PUT(
       );
     }
 
-    const createdByUser: IUser = product.createdBy as unknown as IUser;
+    let createdByUser: (IUser & mongoose.Document) | null;
 
+    createdByUser = await User.findById(product.createdBy.toString());
     if (status === "approved") {
       try {
         const zohoItemPayload: ZohoInventoryItem = {
@@ -118,12 +116,12 @@ export async function PUT(
     product.status = status;
     await product.save();
 
-    if (createdByUser.email) {
+    if (createdByUser?.email) {
       await sendStatusMail(createdByUser.email, {
         status: status as any,
         itemType: "Product",
         itemName: product.name ?? "",
-        actorName: createdByUser.fullName,
+        actorName: claims.fullName,
         decisionAt: product.updatedAt as any,
         submittedAt: product.createdAt,
       });

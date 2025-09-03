@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import dB from "@/lib/db/db";
 import { HttpStatusCode } from "axios";
-import { User } from "../../users/schema";
+import User from "../../users/schema";
 import Token from "@/app/api/db/token/schema";
 import { generateOtp } from "@/lib/utils";
 import { sendOTPEmail } from "@/lib/email-service";

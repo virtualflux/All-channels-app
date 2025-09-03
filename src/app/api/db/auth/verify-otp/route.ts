@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import dB from "@/lib/db/db";
 import { HttpStatusCode } from "axios";
-import { User } from "../../users/schema";
+import User from "../../users/schema";
 import Token from "@/app/api/db/token/schema";
 import { generateAccessToken } from "@/lib/utils";
 import { cookies } from "next/headers";
@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
       email: user.email,
       role: user.role,
       userId: user._id.toString(),
+      fullName: user.fullName,
     });
     // console.log({ accessToken });
     const maxAge = 60 * 60;

@@ -10,6 +10,7 @@ import { AxiosService } from "@/lib/axios.config";
 import { IPriceList } from "@/types/pricelist.type";
 import { IUser } from "@/types/user.type";
 import { sendStatusMail } from "@/lib/email-service";
+import User from "../../users/schema";
 
 interface ZohoPriceBook {
   name: string;
@@ -60,13 +61,11 @@ export async function PUT(
     const body = await req.json();
     const { status } = body;
 
-    const priceList: IPriceList & mongoose.Document = (await PriceList.findOne(
-      {
-        _id: id,
-      },
-      {},
-      { populate: ["createdBy"] }
-    )) as IPriceList & mongoose.Document;
+    const priceList: IPriceList & mongoose.Document = (await PriceList.findById(
+      id
+    )) as any;
+
+    console.log({ price: JSON.stringify(priceList, null, 3) });
 
     if (!priceList) {
       return Response.json(
@@ -75,7 +74,9 @@ export async function PUT(
       );
     }
 
-    const createdByUser: IUser = priceList.createdBy as unknown as IUser;
+    let createdByUser: (IUser & mongoose.Document) | null;
+
+    createdByUser = await User.findById(priceList.createdBy.toString());
 
     if (status === "approved") {
       try {
@@ -124,12 +125,12 @@ export async function PUT(
 
     await priceList.save();
 
-    if (createdByUser.email) {
+    if (createdByUser?.email) {
       await sendStatusMail(createdByUser.email, {
         status: status as any,
         itemType: "Price list",
         itemName: priceList.name ?? "",
-        actorName: createdByUser.fullName,
+        actorName: claims.fullName,
         decisionAt: priceList.updatedAt as any,
         submittedAt: priceList.createdAt,
       });

@@ -47,6 +47,7 @@ async function verifyJWT(token: string) {
     role?: string;
     email?: string;
     userId?: string;
+    fullName: string;
   };
 }
 

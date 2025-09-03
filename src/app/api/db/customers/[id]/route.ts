@@ -12,6 +12,7 @@ import { AccountType } from "../../accounts/schema";
 import { IUser } from "@/types/user.type";
 import { sendStatusMail } from "@/lib/email-service";
 import { ICustomer } from "@/types/customer.type";
+import User from "../../users/schema";
 
 const BodySchema = z.object({
   status: z.enum(["pending", "approved", "rejected"]),
@@ -72,11 +73,10 @@ export async function PUT(
     const body = await req.json();
     const { status } = BodySchema.parse(body);
 
-    const customer: ICustomer & mongoose.Document = (await Customer.findOne(
-      { _id: id, status: "pending" },
-      {},
-      { populate: ["createdBy"] }
-    )) as ICustomer & mongoose.Document;
+    const customer: ICustomer & mongoose.Document = (await Customer.findOne({
+      _id: id,
+      status: "pending",
+    })) as ICustomer & mongoose.Document;
 
     if (!customer) {
       return Response.json(
@@ -85,7 +85,9 @@ export async function PUT(
       );
     }
 
-    const createdByUser: IUser = customer.createdBy as unknown as IUser;
+    let createdByUser: (IUser & mongoose.Document) | null;
+
+    createdByUser = await User.findById(customer.createdBy.toString());
 
     customer.status = status;
 
@@ -133,12 +135,12 @@ export async function PUT(
 
     await customer.save();
 
-    if (createdByUser.email) {
+    if (createdByUser?.email) {
       await sendStatusMail(createdByUser.email, {
         status: status as any,
         itemType: "Customer",
         itemName: customer.company_name ?? "",
-        actorName: createdByUser.fullName,
+        actorName: claims.fullName,
         decisionAt: customer.updatedAt as any,
         submittedAt: customer.createdAt,
       });

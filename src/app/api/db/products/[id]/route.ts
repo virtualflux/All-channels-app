@@ -1,13 +1,15 @@
 import { NextRequest } from "next/server";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { headers } from "next/headers";
 import { UserPayload } from "@/types/user-payload.type";
-import { Product } from "../schema";
+import { Product, ProductType } from "../schema";
 
 import dB from "@/lib/db/db";
 import { HttpStatusCode } from "axios";
 import { ZohoTokenHelper } from "@/lib/zoho-token-helper";
 import { AxiosService } from "@/lib/axios.config";
+import { IUser } from "@/types/user.type";
+import { sendStatusMail } from "@/lib/email-service";
 
 interface ZohoInventoryItem {
   name: string;
@@ -56,7 +58,14 @@ export async function PUT(
 
     const { status } = body;
 
-    const product = await Product.findOne({ _id: id });
+    const product = (await Product.findOne(
+      { _id: id },
+      {},
+      { populate: ["createdBy"] }
+    )) as ProductType & {
+      createdAt: string;
+      updatedAt: string;
+    } & mongoose.Document;
 
     if (!product) {
       return Response.json(
@@ -64,6 +73,8 @@ export async function PUT(
         { status: HttpStatusCode.NotFound }
       );
     }
+
+    const createdByUser: IUser = product.createdBy as unknown as IUser;
 
     if (status === "approved") {
       try {
@@ -106,6 +117,17 @@ export async function PUT(
     // Update the product status
     product.status = status;
     await product.save();
+
+    if (createdByUser.email) {
+      await sendStatusMail(createdByUser.email, {
+        status: status as any,
+        itemType: "Product",
+        itemName: product.name ?? "",
+        actorName: createdByUser.fullName,
+        decisionAt: product.updatedAt as any,
+        submittedAt: product.createdAt,
+      });
+    }
 
     return Response.json(
       { message: "Product status updated successfully", data: product },

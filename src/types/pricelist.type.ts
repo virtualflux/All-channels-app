@@ -12,7 +12,7 @@ export interface IPriceList {
     | "round_to_half_dollar_minus_01";
   pricebook_type: string;
   is_increase: boolean;
-
+  percentage: number;
   pricebook_items: { item_id: string; pricebook_rate: number }[];
   createdBy: string;
   status: "pending" | "rejected" | "approved";

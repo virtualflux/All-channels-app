@@ -8,6 +8,8 @@ import Account, { AccountType } from "../schema";
 import type { UserPayload } from "@/types/user-payload.type";
 import { ZohoTokenHelper } from "@/lib/zoho-token-helper";
 import { AxiosService } from "@/lib/axios.config";
+import { sendStatusMail } from "@/lib/email-service";
+import { IUser } from "@/types/user.type";
 
 const BodySchema = z.object({
   status: z.enum(["pending", "approved", "rejected"]),
@@ -68,14 +70,19 @@ export async function PUT(
     const body = await req.json();
     const { status } = BodySchema.parse(body);
 
-    const account = await Account.findOne({ _id: id, status: "pending" });
-
+    const account = await Account.findOne(
+      { _id: id, status: "pending" },
+      {},
+      { populate: ["createdBy"] }
+    );
     if (!account) {
       return Response.json(
         { message: "Account not found" },
         { status: HttpStatusCode.NotFound }
       );
     }
+
+    const createdByUser: IUser = account?.createdBy as unknown as IUser;
 
     account.status = status;
 
@@ -98,6 +105,7 @@ export async function PUT(
     }
 
     await account.save();
+
     return Response.json(
       { message: "Account status updated", data: account },
       { status: HttpStatusCode.Ok }

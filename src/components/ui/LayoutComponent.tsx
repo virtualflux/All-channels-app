@@ -8,12 +8,51 @@ import UserMenu from "./UserMenu";
 import { UserRole } from "@/types/user.type";
 
 export const menuItems = [
-    { id: "customer", title: "Create Customer", description: "Add new customers", path: "/form/customer" },
-    { id: "product", title: "Create Product", description: "", path: "/form/product" },
-    { id: "pricelist", title: "Create Price List", description: "Add price list", path: "/form/pricelist" },
-    { id: "customerReport", title: "Approve Customers", description: "Manage customers created by staff", path: "/approvals/customer", isAdminRoute: true },
-    { id: "priceApproval", title: "Approve Price List", description: "Manage price approval created by staff", path: "/approvals/pricelist", isAdminRoute: true },
-    { id: "productApproval", title: "Approve Product", description: "", path: "/approvals/product", isAdminRoute: true },
+    {
+        id: "customer",
+        title: "Create Customer",
+        description: "Add new customers",
+        path: "/form/customer",
+        icon: "fi fi-rr-users" // Users icon for customers
+    },
+    {
+        id: "product",
+        title: "Create Product",
+        description: "Add new products to inventory",
+        path: "/form/product",
+        icon: "fi fi-rr-box" // Box icon for products
+    },
+    {
+        id: "pricelist",
+        title: "Create Price List",
+        description: "Add price list",
+        path: "/form/pricelist",
+        icon: "fi fi-rr-money-bill-wave" // Money bill icon for price lists
+    },
+    {
+        id: "customerReport",
+        title: "Approve Customers",
+        description: "Manage customers created by staff",
+        path: "/approvals/customer",
+        isAdminRoute: true,
+        icon: "fi fi-rr-user-check" // User with check mark for customer approvals
+    },
+    {
+        id: "priceApproval",
+        title: "Approve Price List",
+        description: "Manage price approval created by staff",
+        path: "/approvals/pricelist",
+        isAdminRoute: true,
+        icon: "fi fi-rr-clipboard-list-check" // Clipboard with check for price list approvals
+    },
+    {
+        id: "productApproval",
+        title: "Approve Product",
+        description: "Review and approve product submissions",
+        path: "/approvals/product",
+        isAdminRoute: true,
+        icon: "fi fi-rr-search-dollar" // Magnifying glass with dollar for product review/approval
+    }
 ];
 
 const routesWithoutLayout = [
@@ -86,7 +125,6 @@ const LayoutComponent = ({ children }: { children: React.ReactNode }) => {
             {isPathWithLayout && TopBar}
 
             <div className="grid grid-cols-12 gap-x-2">
-                {/* Sidebar column only when allowed */}
                 <div className={classNames("md:col-span-2", { hidden: !shouldShowNav, block: shouldShowNav })}>
                     <SideNav items={menuItems} isOpen={isOpen} onClose={() => setIsOpen(false)} />
                 </div>

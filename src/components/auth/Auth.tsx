@@ -7,10 +7,12 @@ import { FormEvent, useState } from 'react'; import {
 } from "@/components/ui/input-otp"
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const AuthComponent = () => {
     const router = useRouter()
+    const searchParams = useSearchParams()
+
 
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
@@ -23,7 +25,6 @@ const AuthComponent = () => {
         setIsLoading(true);
 
         if (!isEmailSubmitted) {
-            console.log({ email, })
             axios.post("/api/db/auth/get-otp", {
                 email
             }).then((res) => {
@@ -51,7 +52,14 @@ const AuthComponent = () => {
                 localStorage.setItem("role", role)
 
                 toast.success("Login successful")
+                if (searchParams.get("next")) {
+                    const nextPage = searchParams.get("next")
+                    router.replace(nextPage ?? "/dashboard")
+                    return
+                }
+
                 router.push("/dashboard");
+                return
             }).catch((error) => {
                 let message = "Something went wrong"
                 if (axios.isAxiosError(error)) {

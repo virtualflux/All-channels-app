@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import SearchableDropdown from "../ui/SearchAbleDropdown";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 import { ProductType } from "@/app/api/db/products/schema";
-import { InventoryChartAccounts } from "@/types/zoho-inventory-chartaccounts.type";
+import { InventoryChartAccounts } from "@/types/zoho-books-chartaccounts.type";
 
 const ProductForm = () => {
   const fetchAccounts = async () => {

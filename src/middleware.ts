@@ -126,6 +126,7 @@ export const config = {
     "/api/db/accounts/:path*",
     "/api/db/customers/:path*",
     "/api/db/products/:path*",
+    "/api/db/pricelists/:path*",
     // add more protected areas or simply: "/api/:path*", "/(?!_next|favicon\\.ico).*"
   ],
 };

@@ -1,13 +1,13 @@
 import { AxiosService } from "@/lib/axios.config";
 import { ZohoTokenHelper } from "@/lib/zoho-token-helper";
-import { InventoryChartAccounts } from "@/types/zoho-books-chartaccounts.type";
+import { ZohoInventoryItems } from "@/types/zoho-inventory-items.type";
 import axios, { HttpStatusCode } from "axios";
 
 export async function GET() {
   try {
     const accessToken = await ZohoTokenHelper.getAccessToken();
-    const response = await AxiosService.get<InventoryChartAccounts>(
-      `books/v3/chartofaccounts?organization_id=${process.env.ZOHO_ORG_ID}`,
+    const response = await AxiosService.get<ZohoInventoryItems>(
+      `inventory/v1/items?organization_id=${process.env.ZOHO_ORG_ID}`,
       {
         headers: {
           Authorization: `Zoho-oauthtoken ${accessToken}`,
@@ -16,7 +16,7 @@ export async function GET() {
     );
 
     return Response.json(
-      { message: "Accounts fetched", data: response.data.chartofaccounts },
+      { message: "Products fetched", data: response.data.items },
       { status: HttpStatusCode.Ok }
     );
   } catch (error: any) {

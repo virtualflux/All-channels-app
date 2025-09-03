@@ -8,6 +8,9 @@ import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import SearchableDropdown from "../ui/SearchAbleDropdown";
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { ZohoInventoryItems } from "@/types/zoho-inventory-items.type";
 
 const SALES_OR_PURCHASE_TYPES = [
     { name: "Sales", value: "sales" },
@@ -20,11 +23,11 @@ const PRICEBOOK_TYPES = [
 ];
 
 const ROUNDING_TYPES = [
-    { name: "No rounding", value: "no_rounding" },
-    { name: "Round to dollar", value: "round_to_dollar" },
-    { name: "Round to dollar - 0.01", value: "round_to_dollar_minus_01" },
-    { name: "Round to half dollar", value: "round_to_half_dollar" },
-    { name: "Round to half dollar - 0.01", value: "round_to_half_dollar_minus_01" },
+    { name: "Never mind", value: "no_rounding" },
+    { name: "Nearest Whole Number", value: "round_to_dollar" },
+    { name: "0.99", value: "round_to_dollar_minus_01" },
+    { name: "0.50", value: "round_to_half_dollar" },
+    { name: "0.49", value: "round_to_half_dollar_minus_01" },
 ];
 
 type CurrencyRow = { currency_id: string; currency_code: string; currency_name?: string };
@@ -49,49 +52,21 @@ type CommonState = {
     rounding_type: (typeof ROUNDING_TYPES)[number]["value"];
 };
 
-type FormState = CommonState & (FixedPercentageState | PerItemState);
+interface FormState {
+    name: string;
+    description?: string;
+    currency_id: string;
+    sales_or_purchase_type: "sales" | "purchases";
+    rounding_type: string;
+    pricebook_type: string;
+    is_increase?: "markup" | "markdown";
+    percentage?: number;
+    pricebook_items?: Array<{ item_id: string; pricebook_rate: number }>;
 
-const baseSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    description: z.string().optional(),
-    currency_id: z.string().min(1, "Currency is required"),
-    sales_or_purchase_type: z.enum(["sales", "purchases"]),
-    rounding_type: z.enum([
-        "no_rounding",
-        "round_to_dollar",
-        "round_to_dollar_minus_01",
-        "round_to_half_dollar",
-        "round_to_half_dollar_minus_01",
-    ]),
-});
+}
 
-const fixedPercentageSchema = z.object({
-    pricebook_type: z.literal("fixed_percentage"),
-    is_increase: z.boolean(),
-    percentage: z
-        .number({ invalid_type_error: "Percentage is required" })
-        .positive("Percentage must be greater than 0")
-        .max(100000, "Too large"),
-});
 
-const perItemSchema = z.object({
-    pricebook_type: z.literal("per_item"),
-    pricebook_items: z
-        .array(
-            z.object({
-                item_id: z.string().min(1, "Item is required"),
-                pricebook_rate: z
-                    .number({ invalid_type_error: "Rate is required" })
-                    .nonnegative("Rate cannot be negative"),
-            })
-        )
-        .min(1, "Add at least one item"),
-});
 
-const formSchema = z.discriminatedUnion("pricebook_type", [
-    baseSchema.merge(fixedPercentageSchema),
-    baseSchema.merge(perItemSchema),
-]);
 
 async function fetchCurrencies() {
     const res = await axios.get<{ data: CurrencyRow[] }>("/api/zoho/currencies");
@@ -99,11 +74,11 @@ async function fetchCurrencies() {
 }
 
 async function fetchItems() {
-    const res = await axios.get<{ data: ItemRow[] }>("/api/zoho/items");
+    const res = await axios.get<{ message: string; data: ZohoInventoryItems["items"] }>("/api/zoho/products");
     return res.data.data ?? [];
 }
 
-export default function PriceListForm() {
+export const PriceListForm = () => {
     const { data: currencies = [] } = useQuery({ queryKey: ["currencies"], queryFn: fetchCurrencies });
     const { data: items = [] } = useQuery({ queryKey: ["items"], queryFn: fetchItems });
 
@@ -115,15 +90,14 @@ export default function PriceListForm() {
             sales_or_purchase_type: "sales",
             rounding_type: "no_rounding",
             pricebook_type: "fixed_percentage",
-            is_increase: true,
+            is_increase: "markup",
             percentage: 0,
+            pricebook_items: []
 
         } as FormState,
-        validationSchema: toFormikValidationSchema(formSchema),
+        // validationSchema: toFormikValidationSchema(formSchema),
         onSubmit: async (values, { setSubmitting, resetForm }) => {
             try {
-                // Build payload for Zoho Inventory's /pricebooks
-                // Only include fields relevant to selected type
                 const common = {
                     name: values.name,
                     description: values.description || undefined,
@@ -132,22 +106,21 @@ export default function PriceListForm() {
                     rounding_type: values.rounding_type,
                 };
 
-                const payload =
+                const payload: Omit<FormState, "is_increase"> & { is_increase?: boolean } =
                     values.pricebook_type === "fixed_percentage"
                         ? {
                             ...common,
                             pricebook_type: "fixed_percentage",
-                            is_increase: values.is_increase,
+                            is_increase: values.is_increase == "markup",
                             percentage: values.percentage,
                         }
                         : {
                             ...common,
                             pricebook_type: "per_item",
-                            is_increase: true, // Zoho ignores this for per_item but you can omit
                             pricebook_items: values.pricebook_items,
                         };
 
-                await axios.post("/api/zoho/pricebooks", payload, {
+                await axios.post("/api/db/pricelists", payload, {
                     headers: { "Content-Type": "application/json" },
                 });
 
@@ -165,14 +138,13 @@ export default function PriceListForm() {
         },
     });
 
-    // Mode switches keep values tidy
     const switchToFixed = () =>
         formik.setValues({
             ...formik.values,
             pricebook_type: "fixed_percentage",
-            is_increase: true,
+            is_increase: "markup",
             percentage: formik.values.pricebook_type === "fixed_percentage" ? formik.values.percentage : 0,
-            // drop per-item rows when switching (optional)
+
         } as FormState);
 
     const switchToPerItem = () =>
@@ -183,7 +155,6 @@ export default function PriceListForm() {
                 formik.values.pricebook_type === "per_item"
                     ? (formik.values as any).pricebook_items
                     : [],
-            // percentage/is_increase not sent in this mode
         } as FormState);
 
     const addItemRow = () => {
@@ -211,12 +182,10 @@ export default function PriceListForm() {
     );
 
     const itemOptions = useMemo(
-        () => items.map((i) => ({ name: i.name, value: i.item_id })),
+        () => items.map((item) => ({ name: item.name, value: item.item_id })),
         [items]
     );
 
-    const isFixed = formik.values.pricebook_type === "fixed_percentage";
-    const isPerItem = formik.values.pricebook_type === "per_item";
 
     return (
         <div className="min-h-screen">
@@ -307,7 +276,7 @@ export default function PriceListForm() {
                                 <button
                                     type="button"
                                     onClick={switchToFixed}
-                                    className={`px-3 py-2 rounded-md text-sm ${isFixed ? "bg-white shadow" : "opacity-70 hover:opacity-100"
+                                    className={`px-3 py-2 rounded-md text-sm ${formik.values.pricebook_type === "fixed_percentage" ? "bg-white shadow" : "opacity-70 hover:opacity-100"
                                         }`}
                                 >
                                     Fixed Percentage
@@ -315,7 +284,7 @@ export default function PriceListForm() {
                                 <button
                                     type="button"
                                     onClick={switchToPerItem}
-                                    className={`px-3 py-2 rounded-md text-sm ${isPerItem ? "bg-white shadow" : "opacity-70 hover:opacity-100"
+                                    className={`px-3 py-2 rounded-md text-sm ${formik.values.pricebook_type === "per_item" ? "bg-white shadow" : "opacity-70 hover:opacity-100"
                                         }`}
                                 >
                                     Per Item
@@ -323,33 +292,24 @@ export default function PriceListForm() {
                             </div>
                         </div>
 
-                        {isFixed && (
+                        {formik.values.pricebook_type === "fixed_percentage" &&
                             <>
+
                                 <div className="md:col-span-6">
-                                    <label className="block text-sm font-medium text-zinc-700 mb-1">Adjustment</label>
-                                    <div className="flex items-center gap-3">
-                                        <label className="inline-flex items-center gap-2">
-                                            <input
-                                                type="radio"
-                                                name="is_increase"
-                                                checked={true}
-                                                onChange={() => formik.setFieldValue("is_increase", true)}
-                                            />
-                                            <span>Markup</span>
-                                        </label>
-                                        <label className="inline-flex items-center gap-2">
-                                            <input
-                                                type="radio"
-                                                name="is_increase"
-                                                checked={false}
-                                                onChange={() => formik.setFieldValue("is_increase", false)}
-                                            />
-                                            <span>Markdown</span>
-                                        </label>
-                                    </div>
+                                    <RadioGroup className=" flex space-x-2" defaultValue={formik.values.is_increase ?? ""} >
+                                        <div className="flex items-center space-x-2">
+                                            <RadioGroupItem className="" value={"markup"} id={"mark-up"} onChange={(e) => formik.setFieldValue("is_increase", e.currentTarget.value)} />
+                                            <Label htmlFor="mark-up">Markup</Label>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <RadioGroupItem value="markdown" id="mark-down" />
+                                            <Label htmlFor="mark-down">Markdown</Label>
+                                        </div>
+                                    </RadioGroup>
+
                                 </div>
 
-                                {formik.values?.pricebook_type == "per_item" && <div className="md:col-span-6">
+                                {/* <div className="md:col-span-full">
                                     <label className="block text-sm font-medium text-zinc-700 mb-1">Percentage</label>
                                     <input
                                         id="percentage"
@@ -360,7 +320,7 @@ export default function PriceListForm() {
                                         value={0}
                                         onChange={(e) => formik.setFieldValue("percentage", Number(e.target.value))}
                                         onBlur={formik.handleBlur}
-                                        className={`w-full px-4 py-3 border rounded-lg focus:border-teal-500 ${(formik.touched as any).percentage && (formik.errors as any).percentage
+                                        className={`w-1/2 px-4 py-3 border rounded-lg focus:border-teal-500 ${(formik.touched as any).percentage && (formik.errors as any).percentage
                                             ? "border-red-500"
                                             : "border-zinc-300"
                                             }`}
@@ -371,11 +331,14 @@ export default function PriceListForm() {
                                             {(formik.errors as any).percentage as string}
                                         </div>
                                     )}
-                                </div>}
+                                </div> */}
                             </>
-                        )}
 
-                        {isPerItem && (
+                        }
+
+
+
+                        {formik.values.pricebook_type == "per_item" && (
                             <div className="md:col-span-full">
                                 <div className="flex items-center justify-between mb-2">
                                     <h3 className="font-semibold text-zinc-800">Item rates</h3>
@@ -388,16 +351,16 @@ export default function PriceListForm() {
                                     </button>
                                 </div>
 
-                                <div className="space-y-3">
-                                    {((formik.values as any).pricebook_items ?? []).map(
+                                <div className="space-y-3 border border-zinc-200 rounded-md min-h-20">
+                                    {((formik.values.pricebook_items ?? [])).map(
                                         (row: { item_id: string; pricebook_rate: number }, idx: number) => (
-                                            <div key={idx} className="grid grid-cols-12 gap-2">
+                                            <div key={row.item_id} className="grid grid-cols-12 gap-2">
                                                 <div className="col-span-7">
                                                     <SearchableDropdown
                                                         options={itemOptions}
                                                         value={row.item_id}
                                                         onSelect={(opt) => {
-                                                            const rows = [...(formik.values as any).pricebook_items];
+                                                            const rows = [...(formik.values.pricebook_items ?? [])];
                                                             rows[idx] = { ...rows[idx], item_id: opt.value };
                                                             formik.setFieldValue("pricebook_items", rows);
                                                         }}
@@ -411,7 +374,7 @@ export default function PriceListForm() {
                                                         step="0.01"
                                                         value={row.pricebook_rate}
                                                         onChange={(e) => {
-                                                            const rows = [...(formik.values as any).pricebook_items];
+                                                            const rows = [...(formik.values.pricebook_items ?? [])];
                                                             rows[idx] = { ...rows[idx], pricebook_rate: Number(e.target.value) };
                                                             formik.setFieldValue("pricebook_items", rows);
                                                         }}

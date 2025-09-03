@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserRole } from "../../types/user.type";
+import classNames from "classnames";
 
 export type MenuItem = {
     id: string;
@@ -11,6 +12,7 @@ export type MenuItem = {
     description: string;
     path: string;
     isAdminRoute?: boolean;
+    icon: string;
 };
 
 type Props = {
@@ -110,11 +112,12 @@ export default function SideNav({ items, storageKey = "role", isOpen, onClose }:
                         {items.map((item) => {
                             const active = pathname.startsWith(item.path);
                             return (
-                                <li key={item.id}>
+                                <li className={classNames(activeClass(active), "flex items-center gap-2 ")} key={item.id}>
+                                    <i className={item.icon}></i>
                                     <Link
                                         href={item.path}
-                                        className={activeClass(active)}
                                         onClick={onClose}
+                                        className=" -mt-2"
                                     >
                                         <div className="text-sm font-semibold text-gray-800">{item.title}</div>
                                     </Link>

@@ -24,6 +24,7 @@ type IProduct = {
     inventory_account_id?: string;
     status: "pending" | "approved" | "rejected";
     createdAt?: string;
+    updatedAt?: string;
 };
 
 
@@ -47,6 +48,7 @@ const ProductsPage = () => {
     });
 
     const [busyId, setBusyId] = useState<string | null>(null);
+    const [selected, setSelected] = useState<IProduct | null>(null);
 
     type UpdateStatusPayload = { status: "pending" | "approved" | "rejected" };
 
@@ -144,15 +146,23 @@ const ProductsPage = () => {
                     const loading = busyId === product._id;
 
                     if (product.status !== "pending") {
-                        return (
-                            <span className="text-gray-500 text-center text-sm">
-                                No actions
-                            </span>
-                        );
+                        return <button
+                            onClick={() => setSelected(product)}
+                            className="px-3 py-1 border rounded-md text-sm hover:bg-gray-50"
+                        >
+                            View
+                        </button>
                     }
 
                     return (
                         <div className="flex space-x-2">
+                            <button
+                                onClick={() => setSelected(product)}
+                                className="px-3 py-1 border rounded-md text-sm hover:bg-gray-50"
+                            >
+                                View
+                            </button>
+
                             <button
                                 disabled={loading}
                                 onClick={() => approveProduct(product._id)}
@@ -255,9 +265,125 @@ const ProductsPage = () => {
                         <AppTable data={(data as IProduct[]) ?? []} columns={columns} />
                     )}
                 </div>
+                <DetailsModal
+                    open={!!selected}
+                    record={selected}
+                    onClose={() => setSelected(null)}
+                />
             </div>
         </div>
     );
 };
 
 export default ProductsPage;
+
+type DetailsModalProps = {
+    open: boolean;
+    record: IProduct | null;
+    onClose: () => void;
+};
+
+function DetailsModal({ open, record, onClose }: DetailsModalProps) {
+    if (!open || !record) return null;
+
+    return (
+        <div className="fixed inset-0 z-[60]">
+
+            <div
+                className="absolute inset-0 bg-black/40"
+                onClick={onClose}
+                aria-hidden="true"
+            />
+
+            <div
+                role="dialog"
+                aria-modal="true"
+                className="absolute inset-0 flex items-center justify-center p-4"
+            >
+                <div className="w-full max-w-3xl rounded-xl bg-white shadow-xl">
+
+                    <div className="flex items-center justify-between px-5 py-4 border-b">
+                        <h2 className="text-lg font-semibold text-zinc-800">
+                            {record.name}
+                        </h2>
+                        <button
+                            onClick={onClose}
+                            className="rounded-md px-2 py-1 text-sm text-gray-600 hover:bg-gray-100"
+                            aria-label="Close"
+                        >
+                            ✕
+                        </button>
+                    </div>
+
+                    <div className="px-5 py-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <div className="text-xs uppercase text-zinc-500">Unit</div>
+                                <div className="font-medium">{record.unit}</div>
+                            </div>
+
+                            <div>
+                                <div className="text-xs uppercase text-zinc-500">Selling Price</div>
+                                <div className="font-medium">{record.rate}</div>
+                            </div>
+
+                            <div>
+                                <div className="text-xs uppercase text-zinc-500">Cost Price</div>
+                               <div className="font-medium">{record.purchase_rate}</div>
+                            </div>
+
+                            <div>
+                                <div className="text-xs uppercase text-zinc-500">Tracking</div>
+                                <div className="font-medium">{record.track_inventory ? "Yes" : "No"}</div>
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <div className="text-xs uppercase text-zinc-500">Valuation</div>
+                                <div className="font-medium whitespace-pre-wrap">
+                                    {record.inventory_valuation_method}
+                                </div>
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <div className="text-xs uppercase text-zinc-500">Reorder Level</div>
+                                <div className="font-medium whitespace-pre-wrap">
+                                    {record.reorder_level}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-zinc-600">
+                            <div>
+                                <span className="text-zinc-500">Status: </span>
+                                <span className="font-medium">
+                                    {record.status[0].toUpperCase() + record.status.slice(1)}
+                                </span>
+                            </div>
+                            <div>
+                                <span className="text-zinc-500">Created: </span>
+                                <span className="font-medium">
+                                    {record.createdAt ? new Date(record.createdAt).toLocaleString() : "-"}
+                                </span>
+                            </div>
+                            <div>
+                                <span className="text-zinc-500">Updated: </span>
+                                <span className="font-medium">
+                                    {record.updatedAt ? new Date(record.updatedAt).toLocaleString() : "-"}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="px-5 py-3 border-t flex justify-end">
+                        <button
+                            onClick={onClose}
+                            className="px-4 py-2 rounded-md border text-sm hover:bg-gray-50"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

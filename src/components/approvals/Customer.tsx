@@ -205,7 +205,6 @@ const CustomersPage = () => {
                     open={!!selected}
                     record={selected}
                     onClose={() => setSelected(null)}
-                    
                 />
             </div>
         </div>

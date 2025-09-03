@@ -16,7 +16,10 @@ export async function GET() {
     );
 
     return Response.json(
-      { message: "Accounts fetched", data: response.data.chartofaccounts },
+      {
+        message: "Accounts fetched",
+        data: response.data.chartofaccounts.filter((item) => item.is_active),
+      },
       { status: HttpStatusCode.Ok }
     );
   } catch (error: any) {

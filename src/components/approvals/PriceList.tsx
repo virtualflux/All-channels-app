@@ -45,9 +45,8 @@ const PriceListsPage = ({ currencies }: { currencies: ZohoCurrencies["currencies
         queryFn: fetchPriceLists,
     });
 
-    // const { data: currencies = [] } = useQuery({ queryKey: ["currencies"], queryFn: fetchCurrencies });
-
     const [busyId, setBusyId] = useState<string | null>(null);
+    const [selected, setSelected] = useState<IPriceList | null>(null);
 
     type UpdateStatusPayload = { status: IPriceList["status"] };
 
@@ -63,6 +62,12 @@ const PriceListsPage = ({ currencies }: { currencies: ZohoCurrencies["currencies
             setBusyId(null);
         }
     };
+
+    const currencyMap = useMemo(() => {
+        const map = new Map<string, string>();
+        currencies.forEach(c => map.set(c.currency_id, c.currency_code));
+        return map;
+    }, [currencies]);
 
     const approve = (id: string) => updateStatus(id, "approved");
     const reject = (id: string) => updateStatus(id, "rejected");
@@ -134,62 +139,61 @@ const PriceListsPage = ({ currencies }: { currencies: ZohoCurrencies["currencies
                     const loading = busyId === row._id;
 
                     if (row.status !== "pending") {
-                        return <span className="text-gray-500 text-center text-sm">No actions</span>;
+                        return <button
+                            onClick={() => setSelected(row)}
+                            className="px-3 py-1 border rounded-md text-sm hover:bg-gray-50"
+                        >
+                            View
+                        </button>
                     }
 
                     return (
-                        <div className="flex space-x-2">
+                        <div className="flex flex-wrap gap-2">
                             <button
-                                disabled={loading}
-                                onClick={() => approve(row._id)}
-                                className="px-3 py-1 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 focus:outline-none"
+                                onClick={() => setSelected(row)}
+                                className="px-3 py-1 border rounded-md text-sm hover:bg-gray-50"
                             >
-                                {loading ? (
-                                    <span className="flex items-center">
-                                        <svg
-                                            className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path
-                                                className="opacity-75"
-                                                fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                            />
-                                        </svg>
-                                    </span>
-                                ) : (
-                                    "Approve"
-                                )}
+                                View
                             </button>
 
-                            <button
-                                disabled={loading}
-                                onClick={() => reject(row._id)}
-                                className="px-3 py-1 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 focus:outline-none"
-                            >
-                                {loading ? (
-                                    <span className="flex items-center">
-                                        <svg
-                                            className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path
-                                                className="opacity-75"
-                                                fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                            />
-                                        </svg>
-                                    </span>
-                                ) : (
-                                    "Reject"
-                                )}
-                            </button>
+                            {row.status === "pending" ? (
+                                <>
+                                    <button
+                                        disabled={loading}
+                                        onClick={() => approve(row._id)}
+                                        className="px-3 py-1 bg-green-600 text-white rounded-md text-sm hover:bg-green-700"
+                                    >
+                                        {loading ? (
+                                            <span className="flex items-center">
+                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                                </svg>
+                                            </span>
+                                        ) : (
+                                            "Approve"
+                                        )}
+                                    </button>
+                                    <button
+                                        disabled={loading}
+                                        onClick={() => reject(row._id)}
+                                        className="px-3 py-1 bg-red-600 text-white rounded-md text-sm hover:bg-red-700"
+                                    >
+                                        {loading ? (
+                                            <span className="flex items-center">
+                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                                </svg>
+                                            </span>
+                                        ) : (
+                                            "Reject"
+                                        )}
+                                    </button>
+                                </>
+                            ) : (
+                                <span className="text-gray-500 text-center text-sm">No actions</span>
+                            )}
                         </div>
                     );
                 },
@@ -223,9 +227,170 @@ const PriceListsPage = ({ currencies }: { currencies: ZohoCurrencies["currencies
                         <AppTable data={(data as IPriceList[]) ?? []} columns={columns} />
                     )}
                 </div>
+                <DetailsModal
+                    open={!!selected}
+                    record={selected}
+                    onClose={() => setSelected(null)}
+                    currencyCode={selected ? currencyMap.get(selected.currency_id) : undefined}
+                />
             </div>
         </div>
     );
 };
 
 export default PriceListsPage;
+
+type DetailsModalProps = {
+    open: boolean;
+    record: IPriceList | null;
+    onClose: () => void;
+    currencyCode: string | undefined;
+};
+
+function DetailsModal({ open, record, onClose, currencyCode }: DetailsModalProps) {
+    if (!open || !record) return null;
+
+    const typeLabel =
+        record.pricebook_type === "fixed_percentage"
+            ? "Fixed Percentage"
+            : record.pricebook_type === "per_item"
+                ? "Per Item"
+                : record.pricebook_type;
+
+    const appliesTo =
+        record.sales_or_purchase_type
+            ? record.sales_or_purchase_type[0].toUpperCase() + record.sales_or_purchase_type.slice(1)
+            : "-";
+
+    const ROUNDING_LABEL: Record<IPriceList["rounding_type"], string> = {
+        no_rounding: "No rounding",
+        round_to_dollar: "Round to dollar",
+        round_to_dollar_minus_01: "Round to dollar - 0.01",
+        round_to_half_dollar: "Round to half-dollar",
+        round_to_half_dollar_minus_01: "Round to half-dollar - 0.01",
+    };
+
+    const rounding = ROUNDING_LABEL[record.rounding_type] ?? record.rounding_type;
+
+    return (
+        <div className="fixed inset-0 z-[60]">
+
+            <div
+                className="absolute inset-0 bg-black/40"
+                onClick={onClose}
+                aria-hidden="true"
+            />
+
+            <div
+                role="dialog"
+                aria-modal="true"
+                className="absolute inset-0 flex items-center justify-center p-4"
+            >
+                <div className="w-full max-w-3xl rounded-xl bg-white shadow-xl">
+
+                    <div className="flex items-center justify-between px-5 py-4 border-b">
+                        <h2 className="text-lg font-semibold text-zinc-800">
+                            {record.name}
+                        </h2>
+                        <button
+                            onClick={onClose}
+                            className="rounded-md px-2 py-1 text-sm text-gray-600 hover:bg-gray-100"
+                            aria-label="Close"
+                        >
+                            ✕
+                        </button>
+                    </div>
+
+                    <div className="px-5 py-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <div className="text-xs uppercase text-zinc-500">Applies To</div>
+                                <div className="font-medium">{appliesTo}</div>
+                            </div>
+
+                            <div>
+                                <div className="text-xs uppercase text-zinc-500">Type</div>
+                                <div className="font-medium">{typeLabel}</div>
+                            </div>
+
+                            <div>
+                                <div className="text-xs uppercase text-zinc-500">Rounding</div>
+                                <div className="font-medium">{rounding}</div>
+                            </div>
+
+                            <div>
+                                <div className="text-xs uppercase text-zinc-500">Currency</div>
+                                <div className="font-medium">{currencyCode ?? "-"}</div>
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <div className="text-xs uppercase text-zinc-500">Description</div>
+                                <div className="font-medium whitespace-pre-wrap">
+                                    {record.description || "—"}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-6">
+                            <h3 className="text-sm font-semibold text-zinc-800 mb-2">Rules</h3>
+
+                            {record.pricebook_type === "fixed_percentage" ? (
+                                <div className="rounded-lg border p-3 bg-zinc-50">
+                                    <div className="text-sm">
+                                        {record.is_increase ? "Markup" : "Markdown"}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="rounded-lg border divide-y">
+                                    {record.pricebook_items?.length ? (
+                                        record.pricebook_items.map((it, idx) => (
+                                            <div key={idx} className="flex items-center justify-between p-3 text-sm">
+                                                <div className="text-zinc-700">
+                                                    <span className="text-zinc-500">Item ID: </span>
+                                                    <span className="font-medium">{it.item_id}</span>
+                                                </div>
+                                                <div className="font-semibold">{Number(it.pricebook_rate).toFixed(2)}</div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="p-3 text-sm text-zinc-500">No per-item rules.</div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-zinc-600">
+                            <div>
+                                <span className="text-zinc-500">Status: </span>
+                                <span className="font-medium">
+                                    {record.status[0].toUpperCase() + record.status.slice(1)}
+                                </span>
+                            </div>
+                            <div>
+                                <span className="text-zinc-500">Created: </span>
+                                <span className="font-medium">
+                                    {record.createdAt ? new Date(record.createdAt).toLocaleString() : "-"}
+                                </span>
+                            </div>
+                            <div>
+                                <span className="text-zinc-500">Updated: </span>
+                                <span className="font-medium">
+                                    {record.updatedAt ? new Date(record.updatedAt).toLocaleString() : "-"}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="px-5 py-3 border-t flex justify-end">
+                        <button
+                            onClick={onClose}
+                            className="px-4 py-2 rounded-md border text-sm hover:bg-gray-50"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

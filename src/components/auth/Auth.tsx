@@ -8,6 +8,9 @@ import { FormEvent, useState } from 'react'; import {
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { UserRole } from '@/types/user.type';
+
+
 
 const AuthComponent = () => {
     const router = useRouter()
@@ -19,29 +22,33 @@ const AuthComponent = () => {
     const [isEmailSubmitted, setIsEmailSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
+    const handleGetOtp = async (email: string) => {
+        axios.post("/api/db/auth/get-otp", {
+            email
+        }).then((res) => {
+            toast.success("OTP sent to your provided email")
+            setIsEmailSubmitted(true)
+
+        }).catch((error) => {
+            let message = "Something went wrong"
+            console.log(error)
+            if (axios.isAxiosError(error)) {
+                message = error.response?.data?.message || error.message
+
+            }
+
+            toast.error(message)
+        }).finally(() => setIsLoading(false))
+        return
+    }
+
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 
         e.preventDefault();
         setIsLoading(true);
 
         if (!isEmailSubmitted) {
-            axios.post("/api/db/auth/get-otp", {
-                email
-            }).then((res) => {
-                toast.success("OTP sent to your provided email")
-                setIsEmailSubmitted(true)
-
-            }).catch((error) => {
-                let message = "Something went wrong"
-                console.log(error)
-                if (axios.isAxiosError(error)) {
-                    message = error.response?.data?.message || error.message
-
-                }
-
-                toast.error(message)
-            }).finally(() => setIsLoading(false))
-            return
+            return await handleGetOtp(email)
         }
         if (isEmailSubmitted) {
             axios.post("/api/db/auth/verify-otp", {
@@ -51,14 +58,16 @@ const AuthComponent = () => {
                 const role = res.data.role
                 localStorage.setItem("role", role)
 
+                let nextRoute = "/dashboard"
                 toast.success("Login successful")
                 if (searchParams.get("next")) {
                     const nextPage = searchParams.get("next")
-                    router.replace(nextPage ?? "/dashboard")
-                    return
+                    if (role !== UserRole.STAFF) {
+                        nextRoute = nextPage ?? ""
+                    }
                 }
 
-                router.push("/dashboard");
+                router.push(nextRoute);
                 return
             }).catch((error) => {
                 let message = "Something went wrong"
@@ -76,16 +85,14 @@ const AuthComponent = () => {
 
 
 
-        console.log({ email, otp })
+        // console.log({ email, otp })
         return
 
 
 
     };
 
-    //   const handleOtpSubmit = async (e) => {
-    //     e.preventDefault();
-    //     setIsLoading(true);
+    setIsLoading(true);
 
 
     return (
@@ -164,6 +171,7 @@ const AuthComponent = () => {
                                 </div>
                                 <div className="text-sm">
                                     <button
+                                        onClick={() => handleGetOtp(email)}
                                         type="button"
                                         className="font-medium text-teal-600 hover:text-teal-500"
                                     >

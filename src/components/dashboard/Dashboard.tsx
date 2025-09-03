@@ -1,6 +1,6 @@
 "use client"
 import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { menuItems } from '../ui/LayoutComponent';
 
 const Dashboard = () => {
@@ -8,17 +8,25 @@ const Dashboard = () => {
     const router = useRouter()
 
 
+    const [filteredItems, setFilteredItems] = useState(menuItems)
     const handleNavigation = (path: string) => {
         router.push(path);
     };
 
-    const filteredItems = useMemo(() => {
-        const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
-        if (role == null) return menuItems
-        if (role === "admin") return menuItems;
-        return menuItems.filter((item) => !item.isAdminRoute);
+    useEffect(() => {
+        try {
+            const role = localStorage.getItem("role");
+            const filteredItems = menuItems.filter((item) => !item.isAdminRoute);
 
-    }, [menuItems]);
+            if (role == "staff") setFilteredItems(filteredItems)
+            if (role === "admin") return
+
+        } catch {
+
+        }
+    }, []);
+
+
 
     return (
         <div className="min-h-screen" >

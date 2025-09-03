@@ -51,7 +51,7 @@ export const menuItems = [
         description: "Review and approve product submissions",
         path: "/approvals/product",
         isAdminRoute: true,
-        icon: "fi fi-rr-search-dollar" // Magnifying glass with dollar for product review/approval
+        icon: "fi fi-rr-search-dollar"
     }
 ];
 

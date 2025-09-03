@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import dB from "@/lib/db/db";
 import { HttpStatusCode } from "axios";
-import { User } from "./schema";
+import User from "./schema";
 
 export async function POST(request: NextRequest) {
   try {

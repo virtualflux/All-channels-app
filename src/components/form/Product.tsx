@@ -295,7 +295,7 @@ const ProductForm = () => {
                 Account
               </label>
               <SearchableDropdown
-                options={(data ?? []).filter(acc => acc.account_type === "stock").map(item => ({ name: item.account_name, value: item.account_id }))}
+                options={(data ?? []).filter(acc => acc.account_type === "cost_of_goods_sold").map(item => ({ name: item.account_name, value: item.account_id }))}
                 value={formik.values.purchase_account_id}
                 onSelect={(data) => {
                   formik.setFieldValue("purchase_account_id", data.value);
@@ -370,7 +370,7 @@ const ProductForm = () => {
                   Inventory Account
                 </label>
                 <SearchableDropdown
-                  options={(data ?? []).filter(acc => acc.account_type === "cost_of_goods_sold").map(item => ({ name: item.account_name, value: item.account_id }))}
+                  options={(data ?? []).filter(acc => acc.account_type === "stock").map(item => ({ name: item.account_name, value: item.account_id }))}
                   value={formik.values.inventory_account_id ?? ""}
                   onSelect={(data) => {
                     formik.setFieldValue("inventory_account_id", data.value);

@@ -11,6 +11,7 @@ import SearchableDropdown from "../ui/SearchAbleDropdown";
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ZohoInventoryItems } from "@/types/zoho-inventory-items.type";
+import AddPriceListItem from "../ui/AddPriceListItem";
 
 const SALES_OR_PURCHASE_TYPES = [
     { name: "Sales", value: "sales" },
@@ -32,7 +33,7 @@ export const ROUNDING_TYPES = [
 
 type CurrencyRow = { currency_id: string; currency_code: string; currency_name?: string };
 
-interface FormState {
+export interface FormState {
     name: string;
     description?: string;
     currency_id: string;
@@ -162,7 +163,7 @@ export const PriceListForm = () => {
     );
 
     const itemOptions = useMemo(
-        () => items.map((item) => ({ name: item.name, value: item.item_id.toString() })),
+        () => items.map((item) => ({ item_name: item.name, item_id: item.item_id.toString(), pricebook_rate: item.pricebook_rate })),
         [items]
     );
 
@@ -324,7 +325,7 @@ export const PriceListForm = () => {
 
                         {formik.values.pricebook_type == "per_item" && (
                             <div className="md:col-span-full">
-                                <div className="flex items-center justify-between mb-2">
+                                {/* <div className="flex items-center justify-between mb-2">
                                     <h3 className="font-semibold text-zinc-800">Item rates</h3>
                                     <button
                                         type="button"
@@ -333,10 +334,11 @@ export const PriceListForm = () => {
                                     >
                                         + Add Item
                                     </button>
-                                </div>
+                                </div> */}
 
                                 <div className="space-y-3 border border-zinc-100 rounded-md min-h-20">
-                                    {(formik.values.pricebook_items ?? []).map(
+                                    <AddPriceListItem formik={formik} itemOptions={itemOptions} />
+                                    {/* {(formik.values.pricebook_items ?? []).map(
                                         (row: { item_id: string; pricebook_rate: number }, idx: number) => (
                                             <div key={`${idx}-${String(row.item_id ?? "")}`} className="grid grid-cols-12 gap-2">
                                                 <div className="col-span-7">
@@ -383,7 +385,7 @@ export const PriceListForm = () => {
                                                 </div>
                                             </div>
                                         )
-                                    )}
+                                    )} */}
                                 </div>
 
                                 {formik.values.pricebook_type === "per_item" &&

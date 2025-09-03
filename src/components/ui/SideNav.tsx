@@ -36,25 +36,21 @@ export default function SideNav({ items, storageKey = "role", isOpen, onClose }:
         }
     };
 
+    const [filteredItems, setFilteredItems] = useState(items)
+
+
     useEffect(() => {
-        checkRole();
+        try {
+            const role = localStorage.getItem("role");
+            const filteredItems = items.filter((item) => !item.isAdminRoute);
 
-        const handleStorage = (e: StorageEvent) => {
-            if (!e.key || e.key === storageKey) checkRole();
-        };
-        const handleFocus = () => checkRole();
-        const handleCustom = () => checkRole();
+            if (role == "staff") setFilteredItems(filteredItems)
+            if (role === "admin") return
 
-        window.addEventListener("storage", handleStorage);
-        window.addEventListener("focus", handleFocus);
-        window.addEventListener("role-updated", handleCustom as EventListener);
+        } catch {
 
-        return () => {
-            window.removeEventListener("storage", handleStorage);
-            window.removeEventListener("focus", handleFocus);
-            window.removeEventListener("role-updated", handleCustom as EventListener);
-        };
-    }, [storageKey]);
+        }
+    }, []);
 
     useEffect(() => {
         onClose();
@@ -109,7 +105,7 @@ export default function SideNav({ items, storageKey = "role", isOpen, onClose }:
                     </div>
 
                     <ul className="space-y-2">
-                        {items.map((item) => {
+                        {filteredItems.map((item) => {
                             const active = pathname.startsWith(item.path);
                             return (
                                 <li className={classNames(activeClass(active), "flex items-center gap-2 ")} key={item.id}>

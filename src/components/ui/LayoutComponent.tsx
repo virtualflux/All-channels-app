@@ -87,8 +87,8 @@ const LayoutComponent = ({ children }: { children: React.ReactNode }) => {
         [pathname]
     );
 
-    const isAdmin = role === UserRole.ADMIN;
-    const shouldShowNav = isPathWithLayout && isAdmin;
+
+
 
     const TopBar = (
         <div className="md:hidden sticky top-0 z-50 bg-white border-b">
@@ -105,7 +105,6 @@ const LayoutComponent = ({ children }: { children: React.ReactNode }) => {
         </div>
     );
 
-    // Optional: avoid layout shift before we know the role
     if (!mounted) {
         return (
             <div className="min-h-screen">
@@ -125,11 +124,11 @@ const LayoutComponent = ({ children }: { children: React.ReactNode }) => {
             {isPathWithLayout && TopBar}
 
             <div className="grid grid-cols-12 gap-x-2">
-                <div className={classNames("md:col-span-2", { hidden: !shouldShowNav, block: shouldShowNav })}>
+                <div className={classNames("md:col-span-2", { hidden: !isPathWithLayout, block: isPathWithLayout })}>
                     <SideNav items={menuItems} isOpen={isOpen} onClose={() => setIsOpen(false)} />
                 </div>
 
-                <main className={classNames("col-span-full ml-2 mr-4", { "md:col-span-10": shouldShowNav })}>
+                <main className={classNames("col-span-full ml-2 mr-4", { "md:col-span-10": isPathWithLayout })}>
                     {children}
                 </main>
             </div>

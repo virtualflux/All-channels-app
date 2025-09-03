@@ -36,7 +36,7 @@ const CustomerForm = () => {
             account_id: "",
             account_name: '',
             account_code: '',
-            account_type: '',
+            account_type: 'accounts_receivable',
             description: ''
             // contact_number: ''
         },
@@ -47,7 +47,8 @@ const CustomerForm = () => {
                     ...values,
                     contact_persons: values.contact_persons.map(person => ({
                         ...person,
-                        ...(person.phone ? {} : { phone: undefined })
+                        ...(person.phone ? {} : { phone: null }),
+                        ...(person.email ? {} : { email: null })
                     }))
                 };
                 console.log('Submitting customer values:', apiData);
@@ -161,21 +162,6 @@ const CustomerForm = () => {
                             />
                             {formik.touched.account_code && formik.errors.account_code ? (
                                 <div className="mt-1 text-sm text-red-600">{formik.errors.account_code}</div>
-                            ) : null}
-                        </div>
-                        <div className=' col-span-full'>
-                            <label htmlFor="account_type" className="block text-sm font-medium text-zinc-700 mb-1">
-                                Account Type
-                            </label>
-                            <SearchableDropdown
-                                options={ACCOUNT_TYPES}
-                                value={formik.values.account_type}
-                                onSelect={(data) => { formik.setFieldValue("account_type", data.value) }}
-                                placeholder="Select account type"
-                                className=''
-                            />
-                            {formik.touched.account_type && formik.errors.account_type ? (
-                                <div className="mt-1 text-sm text-red-600">{formik.errors.account_type}</div>
                             ) : null}
                         </div>
                         <div className='col-span-full'>
@@ -370,7 +356,7 @@ const CustomerForm = () => {
 
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Email<span className=' text-red-500 text-xs inline-block ml-1'>*</span>
+                                                Email
                                             </label>
                                             <input
                                                 type="email"

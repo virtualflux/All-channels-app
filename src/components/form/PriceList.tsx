@@ -301,7 +301,7 @@ export const PriceListForm = () => {
                                         type="number"
                                         min={0}
                                         step="0.01"
-                                        value={0}
+                                        value={formik.values.percentage}
                                         onChange={(e) => formik.setFieldValue("percentage", Number(e.target.value))}
                                         onBlur={formik.handleBlur}
                                         className={`w-1/2 px-4 py-3 border rounded-lg focus:border-teal-500 ${(formik.touched as any).percentage && (formik.errors as any).percentage

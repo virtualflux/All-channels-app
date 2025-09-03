@@ -69,7 +69,7 @@ const ProductForm = () => {
           .post("/api/db/products", apiData)
           .then((res) => {
             console.log(res);
-            toast.success("Product created successfully");
+            toast.success("Product requesting approval");
           })
           .catch((error) => {
             if (axios.isAxiosError(error)) {
@@ -214,7 +214,7 @@ const ProductForm = () => {
                 Account
               </label>
               <SearchableDropdown
-                options={(data ?? [])?.map(item => ({ name: item.account_name, value: item.account_id }))}
+                options={(data ?? []).filter(acc => acc.account_type === "income").map(item => ({ name: item.account_name, value: item.account_id }))}
                 value={formik.values.account_id}
                 onSelect={(data) => {
                   formik.setFieldValue("account_id", data.value);
@@ -295,7 +295,7 @@ const ProductForm = () => {
                 Account
               </label>
               <SearchableDropdown
-                options={(data ?? [])?.map(item => ({ name: item.account_name, value: item.account_id }))}
+                options={(data ?? []).filter(acc => acc.account_type === "stock").map(item => ({ name: item.account_name, value: item.account_id }))}
                 value={formik.values.purchase_account_id}
                 onSelect={(data) => {
                   formik.setFieldValue("purchase_account_id", data.value);
@@ -370,7 +370,7 @@ const ProductForm = () => {
                   Inventory Account
                 </label>
                 <SearchableDropdown
-                  options={(data ?? [])?.map(item => ({ name: item.account_name, value: item.account_id }))}
+                  options={(data ?? []).filter(acc => acc.account_type === "cost_of_goods_sold").map(item => ({ name: item.account_name, value: item.account_id }))}
                   value={formik.values.inventory_account_id ?? ""}
                   onSelect={(data) => {
                     formik.setFieldValue("inventory_account_id", data.value);

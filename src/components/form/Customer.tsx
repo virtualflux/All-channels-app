@@ -55,7 +55,7 @@ const CustomerForm = () => {
                 await axios.post("/api/db/customers", apiData)
                     .then((res) => {
                         console.log(res)
-                        toast.success("Customer created successfully")
+                        toast.success("Customer requesting approval")
                     })
                     .catch(error => {
                         if (axios.isAxiosError(error)) {

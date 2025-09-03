@@ -104,7 +104,7 @@ export const PriceListForm = () => {
                     headers: { "Content-Type": "application/json" },
                 });
 
-                toast.success("Price list created");
+                toast.success("Price list requesting approval");
                 resetForm();
             } catch (err: any) {
                 const msg =

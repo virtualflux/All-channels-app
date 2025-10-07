@@ -11,11 +11,11 @@ import { ZohoCurrencies } from "@/types/zoho-inventory-currency.type";
 
 
 const ROUNDING_LABEL: Record<IPriceList["rounding_type"], string> = {
-    no_rounding: "No rounding",
-    round_to_dollar: "Round to dollar",
-    round_to_dollar_minus_01: "Round to dollar - 0.01",
-    round_to_half_dollar: "Round to half-dollar",
-    round_to_half_dollar_minus_01: "Round to half-dollar - 0.01",
+  no_rounding: "No rounding",
+  round_to_dollar: "Nearest whole number",
+  round_to_dollar_minus_01: "0.99",
+  round_to_half_dollar: "0.50",
+  round_to_half_dollar_minus_01: "0.49",
 };
 
 type CurrencyRow = { currency_id: string; currency_code: string; currency_name?: string };

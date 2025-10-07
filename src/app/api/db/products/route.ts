@@ -1,6 +1,6 @@
 import dB from "@/lib/db/db";
 import { headers } from "next/headers";
-import { HttpStatusCode } from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { Product } from "./schema";
 import { NextRequest } from "next/server";
 import { UserPayload as AuthPayload } from "@/types/user-payload.type";
@@ -8,7 +8,7 @@ import { UserPayload as AuthPayload } from "@/types/user-payload.type";
 export async function GET(request: NextRequest) {
   try {
     await dB();
-    const product = await Product.find().exec();
+    const product = await Product.find().sort({ createdAt: -1 }).exec();
 
     return Response.json(
       { message: "Products fetched", data: product },
@@ -36,11 +36,16 @@ export async function POST(request: NextRequest) {
         { status: HttpStatusCode.Forbidden }
       );
 
+    // const account = await axios.get('/api/zoho/accounts')
+
+    const ACCOUNT_ID = "4402407000021043011";
+
     const body = await request.json();
     console.log("Body", body);
 
     const product = new Product({
       ...body,
+      account_id: ACCOUNT_ID,
       createdBy: claims.userId,
     });
 

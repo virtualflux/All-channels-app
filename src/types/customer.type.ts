@@ -1,6 +1,3 @@
-import { CustomerType } from "@/app/api/db/customers/schema";
-import { Types } from "mongoose";
-
 export interface ICustomer {
   _id: string;
   createdBy: string;

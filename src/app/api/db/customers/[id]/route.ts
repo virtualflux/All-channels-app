@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import mongoose, { Types } from "mongoose";
 import { z } from "zod";
 import dB from "@/lib/db/db";
-import { Customer, CustomerType } from "../schema";
+import { Customer } from "../schema";
 import type { UserPayload } from "@/types/user-payload.type";
 import { ZohoTokenHelper } from "@/lib/zoho-token-helper";
 import { AxiosService } from "@/lib/axios.config";
@@ -13,6 +13,7 @@ import { IUser } from "@/types/user.type";
 import { sendStatusMail } from "@/lib/email-service";
 import { ICustomer } from "@/types/customer.type";
 import User from "../../users/schema";
+import { CustomerType } from "../types/customer";
 
 const BodySchema = z.object({
   status: z.enum(["pending", "approved", "rejected"]),

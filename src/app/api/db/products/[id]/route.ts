@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import mongoose, { Types } from "mongoose";
 import { headers } from "next/headers";
 import { UserPayload } from "@/types/user-payload.type";
-import { Product, ProductType } from "../schema";
+import { Product } from "../schema";
 
 import dB from "@/lib/db/db";
 import { HttpStatusCode } from "axios";
@@ -11,6 +11,7 @@ import { AxiosService } from "@/lib/axios.config";
 import { IUser } from "@/types/user.type";
 import { sendStatusMail } from "@/lib/email-service";
 import User from "../../users/schema";
+import { ProductType } from "../type/product.type";
 
 interface ZohoInventoryItem {
   name: string;

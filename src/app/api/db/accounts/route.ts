@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     if (status) filter.status = status;
     await dB();
-    const accounts = await Account.find({ ...filter });
+    const accounts = await Account.find({ ...filter }).sort({ createdAt: -1 });
 
     return Response.json(
       {

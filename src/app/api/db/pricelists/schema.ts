@@ -1,42 +1,7 @@
-import { z } from "zod";
-import { Schema, model, mongo } from "mongoose";
+import { Schema, model, models, mongo } from "mongoose";
+import { PriceListType } from "./types/pricelist";
 
-export const priceListSchema = z.object({
-  createdBy: z.string().transform((args, ctx) => new mongo.ObjectId(args)),
-
-  name: z.string().min(1, "Name is required"),
-  description: z.string().optional(),
-  currency_id: z.string().min(1, "Currency is required"),
-  sales_or_purchase_type: z.enum(["sales", "purchases"]),
-  rounding_type: z.enum([
-    "no_rounding",
-    "round_to_dollar",
-    "round_to_dollar_minus_01",
-    "round_to_half_dollar",
-    "round_to_half_dollar_minus_01",
-  ]),
-  status: z.enum(["pending", "rejected", "approved"]),
-  pricebook_type: z.string(),
-  pricebook_items: z
-    .array(
-      z.object({
-        item_id: z.string().min(1, "Item is required"),
-        pricebook_rate: z
-          .number({ invalid_type_error: "Rate is required" })
-          .nonnegative("Rate cannot be negative"),
-      })
-    )
-    .min(1, "Add at least one item"),
-  is_increase: z.boolean(),
-  percentage: z
-    .number({ invalid_type_error: "Percentage is required" })
-    .positive("Percentage must be greater than 0")
-    .max(100000, "Too large"),
-});
-
-export type PriceListType = z.infer<typeof priceListSchema>;
-
-const PriceListSchema = new Schema<Omit<PriceListType, "">>(
+const PriceListSchema = new Schema(
   {
     createdBy: {
       type: Schema.Types.ObjectId,
@@ -92,7 +57,6 @@ const PriceListSchema = new Schema<Omit<PriceListType, "">>(
   { timestamps: true }
 );
 
-export const PriceList = model<Omit<PriceListType, "">>(
-  "PriceList",
-  PriceListSchema
-);
+export const PriceList =
+  models.PriceList ||
+  model<Omit<PriceListType, "">>("PriceList", PriceListSchema);

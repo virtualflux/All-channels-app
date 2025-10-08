@@ -379,6 +379,10 @@ function DetailsModal({ open, record, onClose, currencyCode }: DetailsModalProps
                                 </span>
                             </div>
                         </div>
+                        <div className="mt-8 flex text-sm text-zinc-600 gap-4 item-center">
+                <span className="text-zinc-500 ">Report Submitted by: </span>
+                <p className=" font-medium">{record.createdBy.fullName}</p>
+              </div>
                     </div>
 
                     <div className="px-5 py-3 border-t flex justify-end">

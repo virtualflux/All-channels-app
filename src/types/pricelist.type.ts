@@ -1,3 +1,5 @@
+import { IUser } from "./user.type";
+
 export interface IPriceList {
   _id: string;
   name: string;
@@ -14,7 +16,7 @@ export interface IPriceList {
   is_increase: boolean;
   percentage: number;
   pricebook_items: { item_id: string; pricebook_rate: number }[];
-  createdBy: string;
+  createdBy: IUser;
   status: "pending" | "rejected" | "approved";
   createdAt: string;
   updatedAt: string;

@@ -8,7 +8,11 @@ import { UserPayload as AuthPayload } from "@/types/user-payload.type";
 export async function GET(request: NextRequest) {
   try {
     await dB();
-    const priceList = await PriceList.find().sort({ createdAt: -1 }).exec();
+    const priceList = await PriceList.find()
+      .sort({ createdAt: -1 })
+      .populate("createdBy")
+      .exec();
+      
 
     return Response.json(
       { message: "Price lists fetched", data: priceList },

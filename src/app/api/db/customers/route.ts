@@ -10,7 +10,10 @@ import { IAccount } from "@/types/account.type";
 export async function GET(request: NextRequest) {
   try {
     await dB();
-    const customers = await Customer.find().exec();
+    const customers = await Customer.find()
+      .sort({ createdAt: -1 })
+      .populate("createdBy")
+      .exec();
 
     return Response.json(
       { message: "Customers", data: customers },

@@ -8,7 +8,7 @@ import { UserPayload as AuthPayload } from "@/types/user-payload.type";
 export async function GET(request: NextRequest) {
   try {
     await dB();
-    const product = await Product.find().sort({ createdAt: -1 }).exec();
+    const product = await Product.find().sort({ createdAt: -1 }).populate("createdBy").exec();
 
     return Response.json(
       { message: "Products fetched", data: product },

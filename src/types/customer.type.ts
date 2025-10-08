@@ -1,6 +1,8 @@
+import { IUser } from "./user.type";
+
 export interface ICustomer {
   _id: string;
-  createdBy: string;
+  createdBy: IUser;
   company_name?: string;
   contact_name: string;
   customer_sub_type: string;

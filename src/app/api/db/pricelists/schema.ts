@@ -57,6 +57,4 @@ const PriceListSchema = new Schema(
   { timestamps: true }
 );
 
-export const PriceList =
-  models.PriceList ||
-  model<Omit<PriceListType, "">>("PriceList", PriceListSchema);
+export const PriceList = models.PriceList || model("PriceList", PriceListSchema);

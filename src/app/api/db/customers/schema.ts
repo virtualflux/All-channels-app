@@ -1,5 +1,6 @@
 import { Schema, model, models, mongo } from "mongoose";
 import { CustomerType } from "./types/customer";
+import { UserSchema } from "../users/schema";
 
 const CustomerSchema = new Schema(
   {
@@ -63,5 +64,6 @@ const CustomerSchema = new Schema(
   { timestamps: true }
 );
 
+// model("User", UserSchema);
 export const Customer =
   models.Customer || model<CustomerType>("Customer", CustomerSchema);

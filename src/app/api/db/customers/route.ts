@@ -4,19 +4,26 @@ import dB from "@/lib/db/db";
 import { Customer } from "./schema";
 import { HttpStatusCode } from "axios";
 import { UserPayload as AuthPayload } from "@/types/user-payload.type";
-import Account from "../accounts/schema";
-import { IAccount } from "@/types/account.type";
+
 
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+
+    const limit = 100;
+    const skip = (page - 1) * limit;
     await dB();
+    const totalCustomers = await Customer.countDocuments();
     const customers = await Customer.find()
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .populate("createdBy")
       .exec();
 
     return Response.json(
-      { message: "Customers", data: customers },
+      { message: "Customers", data: customers, count: totalCustomers },
       { status: HttpStatusCode.Ok }
     );
   } catch (e) {

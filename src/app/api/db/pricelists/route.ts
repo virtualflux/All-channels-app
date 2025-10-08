@@ -7,15 +7,28 @@ import { UserPayload as AuthPayload } from "@/types/user-payload.type";
 
 export async function GET(request: NextRequest) {
   try {
+
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+
+    const limit = 100;
+    const skip = (page - 1) * limit;
+
     await dB();
+    const totalPricelist = await PriceList.countDocuments();
     const priceList = await PriceList.find()
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .populate("createdBy")
       .exec();
-      
 
     return Response.json(
-      { message: "Price lists fetched", data: priceList },
+      {
+        message: "Price lists fetched",
+        data: priceList,
+        count: totalPricelist,
+      },
       { status: HttpStatusCode.Ok }
     );
   } catch (e) {

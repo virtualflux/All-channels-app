@@ -43,11 +43,7 @@ const ProductForm = () => {
   const formik = useFormik<
     Omit<
       ProductType,
-      | "account_id"
-      | "product_type"
-      | "ignore_auto_number_generation"
-      | "status"
-      | "createdBy"
+      "product_type" | "ignore_auto_number_generation" | "status" | "createdBy"
     >
   >({
     initialValues: {
@@ -55,7 +51,7 @@ const ProductForm = () => {
       unit: "",
       description: "",
       rate: 0,
-      // account_id: "",
+      account_id: "",
       purchase_rate: 0,
       purchase_account_id: "",
       purchase_description: "",
@@ -228,7 +224,7 @@ const ProductForm = () => {
                   {formik.errors.rate}
                 </div>
               ) : null}
-              {/* 
+
               <label
                 htmlFor="account_id"
                 className="block text-sm font-medium text-zinc-700 mb-1 mt-2"
@@ -236,7 +232,12 @@ const ProductForm = () => {
                 Account
               </label>
               <SearchableDropdown
-                options={(data ?? []).filter(acc => acc.account_type === "income").map(item => ({ name: item.account_name, value: item.account_id }))}
+                options={(data ?? [])
+                  .filter((acc) => acc.account_type === "income")
+                  .map((item) => ({
+                    name: item.account_name,
+                    value: item.account_id,
+                  }))}
                 value={formik.values.account_id}
                 onSelect={(data) => {
                   formik.setFieldValue("account_id", data.value);
@@ -248,7 +249,7 @@ const ProductForm = () => {
                 <div className="mt-1 text-sm text-red-600">
                   {formik.errors.account_id}
                 </div>
-              ) : null} */}
+              ) : null}
 
               <label
                 htmlFor="description"
@@ -470,7 +471,7 @@ const ProductForm = () => {
                   <input
                     id="reorder_level"
                     name="reorder_level"
-                    type="text"
+                    type="number"
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                     value={formik.values.reorder_level}

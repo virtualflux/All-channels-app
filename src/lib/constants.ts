@@ -1,5 +1,11 @@
 export const UNIT_TYPES: { name: string; value: string }[] = [
   { name: "box", value: "box" },
+  { name: "btl", value: "btl" },
+  { name: "sqm", value: "sqm" },
+  { name: "units", value: "units" },
+  { name: "lots", value: "lots" },
+  { name: "ctn", value: "ctn" },
+  { name: "LT", value: "LT" },
   { name: "cm", value: "cm" },
   { name: "dz", value: "dz" },
   { name: "ft", value: "ft" },
@@ -10,8 +16,7 @@ export const UNIT_TYPES: { name: string; value: string }[] = [
   { name: "lg", value: "lg" },
   { name: "mg", value: "mg" },
   { name: "ml", value: "ml" },
+  { name: "lb", value: "lb" },
   { name: "m", value: "m" },
   { name: "pcs", value: "pcs" },
-  { name: "packs", value: "packs" },
-  { name: "schts", value: "schts" },
 ];

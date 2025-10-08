@@ -50,14 +50,13 @@ export async function POST(request: NextRequest) {
 
     // const account = await axios.get('/api/zoho/accounts')
 
-    const ACCOUNT_ID = "4402407000021043011";
+    // const ACCOUNT_ID = "4402407000021043011";
 
     const body = await request.json();
     console.log("Body", body);
 
     const product = new Product({
       ...body,
-      account_id: ACCOUNT_ID,
       createdBy: claims.userId,
     });
 

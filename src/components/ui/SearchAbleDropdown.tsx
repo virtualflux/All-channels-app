@@ -69,12 +69,14 @@ const SearchableDropdown = ({
         setIsOpen(!isOpen);
     };
 
-    useEffect(() => {
-        if (value == "") {
-            setSearchTerm("")
-            setSelectedOption({ name: "", value: "" })
-        }
-    }, [value])
+   useEffect(() => {
+     const matchedOption = options.find((opt) => opt.value === value);
+     if (matchedOption) {
+       setSelectedOption(matchedOption);
+     } else if (value === "") {
+       setSelectedOption({ name: "", value: "" });
+     }
+   }, [value, options]);
 
     return (
         <div className="relative w-full" ref={dropdownRef}>

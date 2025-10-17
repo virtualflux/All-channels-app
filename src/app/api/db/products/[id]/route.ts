@@ -32,6 +32,12 @@ interface ZohoInventoryItem {
   reorder_level?: number;
   inventory_valuation_method?: "fifo" | "wac";
   status?: "active" | "inactive";
+  locations?: {
+    location_id: string;
+    location_name?: string;
+    location_stock_on_hand?: number;
+    initial_stock_rate?: number;
+  }[];
 }
 
 export async function PUT(
@@ -73,6 +79,7 @@ export async function PUT(
     }
 
     let createdByUser: (IUser & mongoose.Document) | null;
+    console.log({ location: product.locations });
 
     createdByUser = await User.findById(product.createdBy.toString());
     if (status === "approved") {
@@ -91,6 +98,12 @@ export async function PUT(
           product_type: product.product_type,
           is_returnable: product.returnable_item,
           reorder_level: product.reorder_level,
+          locations: product.locations.map((location: any) => ({
+            location_id: location.location_id,
+            location_stock_on_hand: Number(location.location_stock_on_hand),
+            initial_stock_rate: Number(location.initial_stock_rate),
+            initial_stock: Number(location.location_stock_on_hand),
+          })) as any,
           inventory_valuation_method: product.inventory_valuation_method,
           ...(product.inventory_account_id && {
             inventory_account_id: product.inventory_account_id,

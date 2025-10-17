@@ -1,4 +1,17 @@
 import { z } from "zod";
+
+export const locationSchema = z.object({
+  location_id: z.string({}).optional(),
+  location_name: z.string({}).optional(),
+  location_stock_on_hand: z.number().optional(),
+  initial_stock_rate: z.number().optional(),
+});
+// .refine((data) => {
+//   if (data?.location_id) {
+//   }
+//   return;
+// },{path:[""],message:"Please"});
+
 export const productSchema = z
   .object({
     // createdBy: z.string().transform((args, ctx) => new mongo.ObjectId(args)),
@@ -38,6 +51,7 @@ export const productSchema = z
     inventory_account_id: z.string().optional(),
     // status: z.enum(["pending", "rejected", "approved"]),
     returnable_item: z.boolean().default(false),
+    locations: z.array(locationSchema),
   })
   .refine((data) => !data.track_inventory || !!data.inventory_account_id, {
     path: ["inventory_account_id"],

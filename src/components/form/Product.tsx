@@ -1,11 +1,8 @@
 "use client";
-import { z } from "zod";
 import axios from "axios";
 import { useFormik } from "formik";
 import { toast } from "react-toastify";
-import { ACCOUNT_TYPES } from "./Ledger";
 import { UNIT_TYPES } from "@/lib/constants";
-import { IAccount } from "@/types/account.type";
 import { useQuery } from "@tanstack/react-query";
 import SearchableDropdown from "../ui/SearchAbleDropdown";
 import { toFormikValidationSchema } from "zod-formik-adapter";
@@ -14,6 +11,7 @@ import {
   productSchema,
   ProductType,
 } from "@/app/api/db/products/type/product.type";
+import LocationInput from "./LocationsInput";
 
 const ProductForm = () => {
   const fetchAccounts = async () => {
@@ -35,6 +33,7 @@ const ProductForm = () => {
       return [];
     }
   };
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["accounts"],
     queryFn: fetchAccounts,
@@ -60,6 +59,14 @@ const ProductForm = () => {
       reorder_level: 1,
       inventory_account_id: "",
       returnable_item: true,
+      locations: [
+        {
+          location_id: "",
+          location_stock_on_hand: 0,
+          location_name: "",
+          initial_stock_rate: 0,
+        },
+      ],
     },
     validationSchema: toFormikValidationSchema(productSchema),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
@@ -93,6 +100,25 @@ const ProductForm = () => {
     },
   });
 
+  const removeLocation = (index: number) => {
+    const locations = formik.values.locations;
+    locations.splice(index);
+    formik.setFieldValue("locations", locations);
+  };
+  const addLocation = () => {
+    const locations = formik.values.locations;
+
+    formik.setFieldValue("locations", [
+      ...locations,
+      {
+        location_id: "",
+        location_stock_on_hand: 0,
+        location_name: "",
+        initial_stock_rate: 0,
+      },
+    ]);
+  };
+
   return (
     <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -108,7 +134,7 @@ const ProductForm = () => {
             className="grid grid-cols-1 md:grid-cols-12 gap-4"
             onSubmit={formik.handleSubmit}
           >
-            <div className="col-span-6">
+            <div className="col-span-full md:col-span-6">
               <label
                 htmlFor="name"
                 className="block text-sm font-medium text-zinc-700 mb-1"
@@ -393,7 +419,7 @@ const ProductForm = () => {
             ) : null}
 
             {formik.values.track_inventory && (
-              <div className="w-full col-span-full grid grid-cols-6 gap-4">
+              <div className="col-span-full grid grid-cols-6 gap-4">
                 <div className=" col-span-3">
                   <label
                     htmlFor="inventory_account_id"
@@ -489,6 +515,34 @@ const ProductForm = () => {
                       {formik.errors.reorder_level}
                     </div>
                   ) : null}
+                </div>
+                <div className=" relative col-span-full border border-gray-200 rounded-md p-4">
+                  <div className="right-5  absolute font-semibold ">
+                    <button
+                      onClick={() => addLocation()}
+                      type="button"
+                      className="bg-slate-200  rounded-md p-1"
+                    >
+                      <i className="fi fi-rr-plus"></i> Add New
+                    </button>
+                  </div>
+                  <div className="mt-12 border-t border-gray-300 pt-8">
+                    {formik.values.locations.map((location, index) => (
+                      <div
+                        key={location.location_id + `${index}`}
+                        className="flex justify-between gap-2 pb-3"
+                      >
+                        <LocationInput locationIndex={index} formik={formik} />
+                        <button
+                          type="button"
+                          onClick={() => removeLocation(index)}
+                          className="text-red-500 text-xs w-8 h-8 hover:text-red-700 p-1 border border-red-200 rounded-sm hover:bg-red-50 inline-block items-start"
+                        >
+                          <i className="fi fi-rr-trash"></i>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

@@ -48,13 +48,19 @@ const PriceListsPage = ({ currencies }: { currencies: ZohoCurrencies["currencies
       queryFn: () => fetchPriceLists(currentPage),
     });
 
-    const [busyId, setBusyId] = useState<string | null>(null);
+    const [busyAction, setBusyAction] = useState<{
+      id: string;
+      action: "approve" | "reject";
+    } | null>(null);
     const [selected, setSelected] = useState<IPriceList | null>(null);
 
     type UpdateStatusPayload = { status: IPriceList["status"] };
 
     const updateStatus = async (id: string, status: IPriceList["status"]) => {
-      setBusyId(id);
+      setBusyAction({
+        id,
+        action: status === "approved" ? "approve" : "reject",
+      });
       try {
         await axios.put(`/api/db/pricelists/${id}`, {
           status,
@@ -66,7 +72,7 @@ const PriceListsPage = ({ currencies }: { currencies: ZohoCurrencies["currencies
       } catch (e) {
         toast.error("Failed to update price list");
       } finally {
-        setBusyId(null);
+        setBusyAction(null);
       }
     };
 
@@ -151,7 +157,10 @@ const PriceListsPage = ({ currencies }: { currencies: ZohoCurrencies["currencies
           header: "Actions",
           cell: (info: any) => {
             const row = info.row.original as IPriceList;
-            const loading = busyId === row._id;
+            const loadingApprove =
+              busyAction?.id === row._id && busyAction?.action === "approve";
+            const loadingReject =
+              busyAction?.id === row._id && busyAction?.action === "reject";
 
             if (row.status !== "pending") {
               return (
@@ -176,11 +185,11 @@ const PriceListsPage = ({ currencies }: { currencies: ZohoCurrencies["currencies
                 {row.status === "pending" ? (
                   <>
                     <button
-                      disabled={loading}
+                      disabled={loadingApprove || loadingReject}
                       onClick={() => approve(row._id)}
                       className="px-3 py-1 bg-green-600 text-white rounded-md text-sm hover:bg-green-700"
                     >
-                      {loading ? (
+                      {loadingApprove ? (
                         <span className="flex items-center">
                           <svg
                             className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
@@ -208,11 +217,11 @@ const PriceListsPage = ({ currencies }: { currencies: ZohoCurrencies["currencies
                       )}
                     </button>
                     <button
-                      disabled={loading}
+                      disabled={loadingApprove || loadingReject}
                       onClick={() => reject(row._id)}
                       className="px-3 py-1 bg-red-600 text-white rounded-md text-sm hover:bg-red-700"
                     >
-                      {loading ? (
+                      {loadingReject ? (
                         <span className="flex items-center">
                           <svg
                             className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
@@ -250,7 +259,7 @@ const PriceListsPage = ({ currencies }: { currencies: ZohoCurrencies["currencies
           },
         },
       ],
-      [busyId]
+      [busyAction]
     );
 
     return (

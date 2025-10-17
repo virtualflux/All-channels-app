@@ -57,6 +57,11 @@ export async function POST(request: NextRequest) {
 
     const product = new Product({
       ...body,
+      locations: body.locations.map((location: any) => ({
+        location_id: location.location_id,
+        location_stock_on_hand: location.location_stock_on_hand,
+        initial_stock_rate: location.initial_stock_rate,
+      })),
       createdBy: claims.userId,
     });
 

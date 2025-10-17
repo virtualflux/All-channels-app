@@ -69,6 +69,24 @@ const ProductSchema = new Schema(
       type: Boolean,
       default: true,
     },
+    locations: [
+      {
+        location_id: {
+          type: String,
+        },
+        location_name: {
+          type: String,
+        },
+        location_stock_on_hand: {
+          type: String,
+          default: 0,
+        },
+        initial_stock_rate: {
+          type: String,
+          default: 0,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
